@@ -1,14 +1,14 @@
 #include "texture.hpp"
 
 namespace Turbine {
-bool load_texture(texture* tex, const char* file_path, uint32_t filter_mag, uint32_t filter_min, bool keep_data) {
+bool load_texture(Texture& tex, const std::string& file_path, uint32_t filter_mag, uint32_t filter_min, bool keep_data) {
     uint32_t texture;
     
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
-    tex->id = texture;
-    tex->filter_mag = filter_mag;
-    tex->filter_min = filter_min;
+    tex.id = texture;
+    tex.filter_mag = filter_mag;
+    tex.filter_min = filter_min;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -18,28 +18,28 @@ bool load_texture(texture* tex, const char* file_path, uint32_t filter_mag, uint
 
     int width, height, comp;
     stbi_set_flip_vertically_on_load(0);
-    unsigned char* data = stbi_load(file_path, &width, &height, &comp, STBI_rgb_alpha);
+    unsigned char* data = stbi_load(file_path.c_str(), &width, &height, &comp, STBI_rgb_alpha);
 
     if(data) {
-        tex->width = width;
-        tex->height = height;
-        tex->data = data;
+        tex.width = width;
+        tex.height = height;
+        tex.data = data;
     } else {
         generate_texture(tex, width, height);
         return false;
     }
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex->data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.data);
 
     if(!keep_data) {
         stbi_image_free(data);
     }
     
-    printf("TEXTURE: Loaded texture (%i) from (%s). [%i, %i]\n", tex->id, file_path, tex->width, tex->height);
+    printf("TEXTURE: Loaded texture (%i) from (%s). [%i, %i]\n", tex.id, file_path.c_str(), tex.width, tex.height);
     return true;
 }
 
-void generate_texture(texture* tex, uint32_t width, uint32_t height) {
+void generate_texture(Texture& tex, uint32_t width, uint32_t height) {
     uint32_t texture;
 
     glGenTextures(1, &texture);
@@ -49,19 +49,16 @@ void generate_texture(texture* tex, uint32_t width, uint32_t height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    tex->id = texture;
-    tex->width = width;
-    tex->height = height;
+    tex.id = texture;
+    tex.width = width;
+    tex.height = height;
 }
 
-void bind_texture(texture* tex) {
-    if(tex == NULL)
-        return;
-    
-    glBindTexture(GL_TEXTURE_2D, tex->id);
+void bind_texture(Texture& tex) {
+    glBindTexture(GL_TEXTURE_2D, tex.id);
 }
 
-void unbind_texture() {
+void unbind_texture(void) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 }

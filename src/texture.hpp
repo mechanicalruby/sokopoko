@@ -22,10 +22,9 @@ struct Texture {
 
 bool load_texture(Texture& tex, const std::string& file_path, uint32_t filter_mag, uint32_t filter_min, bool keep_data);
 void bind_texture(Texture& tex);
-void unbind_texture();
+void unbind_texture(void);
 
 // blank texture target
 void generate_texture(Texture& tex, uint32_t width, uint32_t height);
 }
-
 #endif

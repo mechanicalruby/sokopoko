@@ -1,4 +1,4 @@
-#include "window.h"
+#include "window.hpp"
 
 namespace Turbine {
 bool init_window(Window& window, const std::string& name, int width, int height) {
@@ -9,7 +9,7 @@ bool init_window(Window& window, const std::string& name, int width, int height)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-    window.ptr = glfwCreateWindow(width, height, name, NULL, NULL);
+    window.ptr = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
     if (window.ptr == nullptr) {
         printf("Failed to initialize window.");
         glfwTerminate();
@@ -28,11 +28,11 @@ bool init_window(Window& window, const std::string& name, int width, int height)
 bool set_window_icon(Window& window, const std::string& file_path) {
     Turbine::Texture icon;
     
-    if(!Turbine::load_texture(&icon, file_path, TB_NEAREST, TB_NEAREST, true)) {
+    if(!Turbine::load_texture(icon, file_path, TB_NEAREST, TB_NEAREST, true)) {
         return false;
     }
     
-    GLFWimage glfw_icon = (GLFWimage){
+    GLFWimage glfw_icon = GLFWimage {
         .width = (int)icon.width,
         .height = (int)icon.height,
         .pixels = (unsigned char*)icon.data,
@@ -55,5 +55,22 @@ bool destroy_window(Window& window) {
         return true;
     }
     return false;
+}
+
+void poll_window(Window& window) {
+    glfwPollEvents();
+}
+
+void set_viewport(float x, float y, float width, float height) {
+    glViewport(x, y, width, height);
+}
+
+void swap_buffers(Window& window) {
+    glfwSwapBuffers(window.ptr);
+}
+
+void clear(Window& window, float r, float g, float b) {
+    glClearColor(r, g, b, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 }

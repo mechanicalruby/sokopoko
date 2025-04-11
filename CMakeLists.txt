@@ -9,10 +9,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_subdirectory("include/glfw/")
 set(GLFW_BUILD_WAYLAND OFF)
 
+# OpenGL
 find_package(OpenGL REQUIRED)
+
+# GLM
+add_subdirectory("include/glm/")
 
 file(GLOB COMMON_SRC
   # "include/yyjson/yyjson.c" # yyjson
+  "src/*.c"
   "src/*.cpp"
 )
 
@@ -20,19 +25,29 @@ file(GLOB SOKOPOKO_SRC
   "src/sokopoko/*.cpp"
 )
 
+file(GLOB IMGUI_SRC
+  "include/imgui/*.cpp"
+  "include/imgui/backends/imgui_impl_glfw.cpp"
+  "include/imgui/backends/imgui_impl_opengl3.cpp"
+)
+
 include_directories(
   ${OPENGL_INCLUDE_DIR}
   ${GLFW3_INCLUDE_DIR}
+  "include/imgui/"
+  "include/imgui/backends"
   "include/"
 )
 
 add_executable(${PROJECT_NAME}
   ${COMMON_SRC}
+  ${IMGUI_SRC}
   ${SOKOPOKO_SRC}
 )
 
 target_link_libraries(${PROJECT_NAME}
   ${OPENGL_gl_LIBRARY}
+  glm::glm
   glfw
 )
 

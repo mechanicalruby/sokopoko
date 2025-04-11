@@ -1,0 +1,132 @@
+#include "sprite.hpp"
+
+namespace Turbine {
+
+// Sprite
+
+Sprite::Sprite() {
+    x = 0.0f;
+    y = 0.0f;
+    origin_x = 0.0f;
+    origin_y = 0.0f;
+    offset_x = 0.0f;
+    offset_y = 0.0f;
+    scale_x = 1.0f;
+    scale_y = 1.0f;
+    rotation = 0.0f;
+    layer = 0.0f;
+    centered = true;
+    flip_h = false;
+    flip_v = false;
+    visible = true;
+    color = 0xFFFFFFFF;
+    region = Rect{0.0f, 0.0f, 64.0f, 64.0f};
+    texture = nullptr;
+}
+
+void y_compare_sprites(const Sprite& a, const Sprite& b) {
+
+}
+
+void layer_compare_sprites(const Sprite& a, const Sprite& b) {
+
+}
+
+// Batch
+
+Batch::Batch() {
+    texture = nullptr;
+    index_offset = 0;
+
+    generate_vertex_array(&vao);
+    bind_vertex_array(vao);
+    generate_vertex_buffer(&vbo);
+    bind_vertex_buffer(vbo);
+    allocate_vertex_buffer(vbo, vertices.data(), sizeof(Vertex) * BATCH_SIZE);
+    set_vertex_attributes();
+    unbind_vertex_buffer();
+    unbind_vertex_array();
+}
+
+void Batch::calculate_vertices(Sprite& sprite, size_t offset) {
+    if (offset > vertices.size() - 6) {
+        std::cerr << "SPRITEBATCH: Failed to find enough space for sprite" << std::endl;
+        return;
+    }
+
+    if (texture == nullptr && sprite.texture != nullptr) {
+        texture = sprite.texture;
+    }
+
+    if (texture == nullptr) {
+        return;
+    }
+
+    if (sprite.centered) {
+        sprite.origin_x = (sprite.region.width * sprite.scale_x) / 2;
+        sprite.origin_y = (sprite.region.height * sprite.scale_y) / 2;
+    }
+
+    Rect& source = sprite.region;
+    float x, y, src_x, src_y, src_width, src_height;
+
+    x          = (sprite.x - sprite.origin_x) + sprite.offset_x;
+    y          = (sprite.y - sprite.origin_y) + sprite.offset_y;
+    src_x      = source.x;
+    src_y      = source.y;
+    src_width  = source.width;
+    src_height = source.height;
+
+    float width = source.width * sprite.scale_x;
+    float height = source.height * sprite.scale_y;
+
+    glm::vec2 top_left     = {x        , y         };
+    glm::vec2 top_right    = {x + width, y         };
+    glm::vec2 bottom_left  = {x        , y + height};
+    glm::vec2 bottom_right = {x + width, y + height};
+
+    if (sprite.flip_h) {
+        std::swap(top_left.x,    top_right.x);
+        std::swap(top_left.y,    top_right.y);
+        std::swap(bottom_left.x, bottom_right.x);
+        std::swap(bottom_left.y, bottom_right.y);
+    }
+
+    if (sprite.flip_v) {
+        std::swap(top_left.x, bottom_left.x);
+        std::swap(top_left.y, bottom_left.y);
+        std::swap(top_right.x, bottom_right.x);
+        std::swap(top_right.y, bottom_right.y);
+    }
+
+    vertices[index_offset + 0] = Vertex{top_left.x    , top_left.y,     -1.0f, src_x / texture->width,               src_y / texture->height,                sprite.color};
+    vertices[index_offset + 1] = Vertex{bottom_left.x , bottom_left.y,  -1.0f, src_x / texture->width,               (src_y + src_height) / texture->height, sprite.color};
+    vertices[index_offset + 2] = Vertex{bottom_right.x, bottom_right.y, -1.0f, (src_x + src_width) / texture->width, (src_y + src_height) / texture->height, sprite.color};
+    vertices[index_offset + 3] = Vertex{top_right.x   , top_right.y,    -1.0f, (src_x + src_width) / texture->width, src_y / texture->height,                sprite.color};
+    vertices[index_offset + 4] = vertices[index_offset + 2];
+    vertices[index_offset + 5] = vertices[index_offset + 0];
+}
+
+void Batch::queue(Sprite& sprite) {
+    calculate_vertices(sprite, index_offset);
+    index_offset += 6;
+}
+
+void Batch::begin(void) {
+    index_offset = 0;
+}
+
+void Batch::draw(void) {
+    if(texture != nullptr) {
+        Turbine::bind_texture(*texture);
+    }
+
+    // only draw what we need
+    size_t upper_bound = index_offset;
+
+    Turbine::bind_vertex_array(vao);
+    Turbine::bind_vertex_buffer(vbo);
+    Turbine::update_vertex_buffer(vbo, vertices.data(), upper_bound * sizeof(Vertex), 0);
+    glDrawArrays(GL_TRIANGLES, 0, (int)upper_bound);
+}
+}
