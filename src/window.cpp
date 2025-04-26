@@ -25,6 +25,11 @@ bool init_window(Window& window, const std::string& name, int width, int height)
     return true;
 }
 
+void set_blend_mode(Window& window) {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
 bool set_window_icon(Window& window, const std::string& file_path) {
     Turbine::Texture icon;
     
@@ -61,7 +66,7 @@ void poll_window(Window& window) {
     glfwPollEvents();
 }
 
-void set_viewport(float x, float y, float width, float height) {
+void set_viewport(int x, int y, int width, int height) {
     glViewport(x, y, width, height);
 }
 

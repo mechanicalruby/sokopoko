@@ -44,6 +44,7 @@ struct InputState {
 };
 
 void init_input_callbacks(InputState& state, Window& window);
+void bind_input_defaults(InputState& state);
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void mouse_cursor_callback(GLFWwindow* window, double xpos, double ypos);

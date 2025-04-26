@@ -29,6 +29,9 @@ file(GLOB IMGUI_SRC
   "include/imgui/*.cpp"
   "include/imgui/backends/imgui_impl_glfw.cpp"
   "include/imgui/backends/imgui_impl_opengl3.cpp"
+
+  # Custom
+  "src/imgui/*.cpp"
 )
 
 include_directories(

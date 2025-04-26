@@ -24,7 +24,10 @@ bool should_close_window(Window& window);
 void poll_window(Window& window);
 void swap_buffers(Window& window);
 void clear(Window& window, float r, float g, float b);
-void set_viewport(float x, float y, float width, float height);
+void set_viewport(int x, int y, int width, int height);
+
+// add other blend funcs later
+void set_blend_mode(Window& window);
 
 bool destroy_window(Window& window);
 }

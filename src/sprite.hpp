@@ -1,7 +1,7 @@
 #ifndef SPRITE_HPP
 #define SPRITE_HPP
 
-#define BATCH_SIZE 192
+#define BATCH_SIZE 1536
 
 #include "vbuffer.hpp"
 #include "texture.hpp"
@@ -15,13 +15,6 @@
 
 #include <glm/glm.hpp>
 
-/*
-  Each texture gets its own batch.
-  Whenever 
-
-
- */
-
 namespace Turbine {
 struct Vertex {
     float x, y, z;
@@ -34,11 +27,15 @@ struct Rect {
     float width, height;
 };
 
-struct Sprite {
+struct Vector2 {
     float x, y;
-    float origin_x, origin_y;
-    float offset_x, offset_y;
-    float scale_x, scale_y;
+};
+
+struct Sprite {
+    Vector2 position;
+    Vector2 origin;
+    Vector2 offset;
+    Vector2 scale;
     float rotation;
     float layer;
     bool centered;
@@ -58,6 +55,9 @@ struct Batch {
     uint32_t vbo, vao;
     
     size_t index_offset;
+    
+    // List of all queued sprites:
+    static int g_num_sprites;
 
     Batch();
     void calculate_vertices(Sprite& sprite, size_t offset);

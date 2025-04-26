@@ -1,9 +1,7 @@
-#ifndef RENDERLIST_HPP
-#define RENDERLIST_HPP
+#include "render_list.hpp"
 
 namespace Turbine {
-void auto_render_list(const std::vector<Sprite*>& sprites)
-{
+void auto_render_list(const std::vector<Sprite*>& sprites) {
     Sprite* last = nullptr;
     
     for(Sprite* sprite : sprites)
@@ -16,8 +14,4 @@ void auto_render_list(const std::vector<Sprite*>& sprites)
         }
     }
 }
-
-
 }
-
-#endif

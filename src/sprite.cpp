@@ -2,17 +2,15 @@
 
 namespace Turbine {
 
-// Sprite
-
 Sprite::Sprite() {
-    x = 0.0f;
-    y = 0.0f;
-    origin_x = 0.0f;
-    origin_y = 0.0f;
-    offset_x = 0.0f;
-    offset_y = 0.0f;
-    scale_x = 1.0f;
-    scale_y = 1.0f;
+    position.x = 0.0f;
+    position.y = 0.0f;
+    origin.x = 0.0f;
+    origin.y = 0.0f;
+    offset.x = 0.0f;
+    offset.y = 0.0f;
+    scale.x = 1.0f;
+    scale.y = 1.0f;
     rotation = 0.0f;
     layer = 0.0f;
     centered = true;
@@ -31,8 +29,6 @@ void y_compare_sprites(const Sprite& a, const Sprite& b) {
 void layer_compare_sprites(const Sprite& a, const Sprite& b) {
 
 }
-
-// Batch
 
 Batch::Batch() {
     texture = nullptr;
@@ -63,22 +59,22 @@ void Batch::calculate_vertices(Sprite& sprite, size_t offset) {
     }
 
     if (sprite.centered) {
-        sprite.origin_x = (sprite.region.width * sprite.scale_x) / 2;
-        sprite.origin_y = (sprite.region.height * sprite.scale_y) / 2;
+        sprite.origin.x = (sprite.region.width * sprite.scale.x) / 2;
+        sprite.origin.y = (sprite.region.height * sprite.scale.y) / 2;
     }
 
     Rect& source = sprite.region;
     float x, y, src_x, src_y, src_width, src_height;
 
-    x          = (sprite.x - sprite.origin_x) + sprite.offset_x;
-    y          = (sprite.y - sprite.origin_y) + sprite.offset_y;
+    x          = (sprite.position.x - sprite.origin.x) + sprite.offset.x;
+    y          = (sprite.position.y - sprite.origin.y) + sprite.offset.y;
     src_x      = source.x;
     src_y      = source.y;
     src_width  = source.width;
     src_height = source.height;
 
-    float width = source.width * sprite.scale_x;
-    float height = source.height * sprite.scale_y;
+    float width = source.width * sprite.scale.x;
+    float height = source.height * sprite.scale.y;
 
     glm::vec2 top_left     = {x        , y         };
     glm::vec2 top_right    = {x + width, y         };

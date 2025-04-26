@@ -78,4 +78,17 @@ bool set_input_bind(InputState& state, InputAction action, unsigned int key, int
     }
     return false;
 }
+
+void bind_input_defaults(InputState& state) {
+    // PC, Sokopoko
+    Turbine::set_input_bind(state, InputAction::MOVE_UP   , GLFW_KEY_W    , InputMode::MODE_KEY);
+    Turbine::set_input_bind(state, InputAction::MOVE_LEFT , GLFW_KEY_A    , InputMode::MODE_KEY);
+    Turbine::set_input_bind(state, InputAction::MOVE_DOWN , GLFW_KEY_S    , InputMode::MODE_KEY);
+    Turbine::set_input_bind(state, InputAction::MOVE_RIGHT, GLFW_KEY_D    , InputMode::MODE_KEY);
+    Turbine::set_input_bind(state, InputAction::UI_UP     , GLFW_KEY_UP   , InputMode::MODE_KEY);
+    Turbine::set_input_bind(state, InputAction::UI_LEFT   , GLFW_KEY_LEFT , InputMode::MODE_KEY);
+    Turbine::set_input_bind(state, InputAction::UI_DOWN   , GLFW_KEY_DOWN , InputMode::MODE_KEY);
+    Turbine::set_input_bind(state, InputAction::UI_RIGHT  , GLFW_KEY_RIGHT, InputMode::MODE_KEY);
+    Turbine::set_input_bind(state, InputAction::UNDO      , GLFW_KEY_Z    , InputMode::MODE_KEY);
+}
 }

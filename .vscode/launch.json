@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "(Windows) Launch",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}\\build\\Debug\\Sokopoko.exe",
+            "args": [],
+            "stopAtEntry": false,
+            // "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}/build/",
+            "environment": [],
+            "console": "internalConsole" // externalTerminal
+        }
+    ],
+    "version": "2.0.0"
+}
