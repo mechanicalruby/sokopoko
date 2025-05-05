@@ -26,6 +26,6 @@ void GameState::draw(Turbine::Window& window, Turbine::Shader& base_shader) {
 
     b1.begin();
     b1.queue(sprite);
-    b1.draw();
+    b1.end();
 }
 }

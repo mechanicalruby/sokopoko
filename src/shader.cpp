@@ -32,12 +32,12 @@ bool check_compile_error(GLuint object, ProgramType type) {
     return true;
 }
 
-void compile_shader(Shader& shader, const char* vert_path, const char* frag_path) {
+void compile_shader(Shader& shader, const char* vert, const char* frag) {
     GLuint vertex_s, fragment_s;
     printf("SHADER: beginning shader compilation.\n");
 
     vertex_s = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_s, 1, &vert_path, NULL);
+    glShaderSource(vertex_s, 1, &vert, NULL);
     glCompileShader(vertex_s);
     printf("SHADER: vertex shader #%i attempt compile.\n", vertex_s);
     if(check_compile_error(vertex_s, TB_VERT_SHADER) == false) {
@@ -46,7 +46,7 @@ void compile_shader(Shader& shader, const char* vert_path, const char* frag_path
     }
     
     fragment_s = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_s, 1, &frag_path, NULL);
+    glShaderSource(fragment_s, 1, &frag, NULL);
     glCompileShader(fragment_s);
     printf("SHADER: fragment shader #%i attempt compile.\n", fragment_s);
     if(check_compile_error(vertex_s, TB_FRAG_SHADER) == false) {

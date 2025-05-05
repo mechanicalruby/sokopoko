@@ -10,9 +10,9 @@
 #include "../render_list.hpp"
 #include "../camera.hpp"
 
-#include "sokoban.hpp"
-
-#include "imgui.h"
+#include "soko.hpp"
+#include "soko_map.hpp"
+#include "soko_imgui.hpp"
 
 namespace Sokoban {
 struct MenuState : public Turbine::State {
@@ -21,14 +21,17 @@ private:
     Turbine::Batch b2;
     Turbine::Texture texture;
     Turbine::Texture object_texture;
+    Turbine::Texture map_texture;
 
     Turbine::Sprite sprite {};
     Turbine::Animation anim {};
 
+    Turbine::Shader f_shad;
     Turbine::Camera cam;
-    ObjectList objects;
+    
+    Map map;
 
-    bool camera_follow_player = false;
+    double mouse_x, mouse_y;
 public:
     MenuState() = default;
     ~MenuState();

@@ -64,7 +64,7 @@ struct Batch {
 
     void queue(Sprite& sprite);
     void begin(void);
-    void draw(void);
+    void end(void);
 };
 
 void y_compare_sprites(const Sprite& a, const Sprite& b);

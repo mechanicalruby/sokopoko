@@ -90,5 +90,7 @@ void bind_input_defaults(InputState& state) {
     Turbine::set_input_bind(state, InputAction::UI_DOWN   , GLFW_KEY_DOWN , InputMode::MODE_KEY);
     Turbine::set_input_bind(state, InputAction::UI_RIGHT  , GLFW_KEY_RIGHT, InputMode::MODE_KEY);
     Turbine::set_input_bind(state, InputAction::UNDO      , GLFW_KEY_Z    , InputMode::MODE_KEY);
+    // PC, Sokopoko debug
+    Turbine::set_input_bind(state, InputAction::EDITOR_PLACE_TILE, GLFW_MOUSE_BUTTON_LEFT, InputMode::MODE_MOUSE);
 }
 }

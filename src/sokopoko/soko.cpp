@@ -1,4 +1,4 @@
-#include "sokoban.hpp"
+#include "soko.hpp"
 
 namespace Sokoban {
 

@@ -104,6 +104,9 @@ void Batch::calculate_vertices(Sprite& sprite, size_t offset) {
 }
 
 void Batch::queue(Sprite& sprite) {
+    if(!sprite.visible)
+        return;
+    
     calculate_vertices(sprite, index_offset);
     index_offset += 6;
 }
@@ -112,7 +115,7 @@ void Batch::begin(void) {
     index_offset = 0;
 }
 
-void Batch::draw(void) {
+void Batch::end(void) {
     if(texture != nullptr) {
         Turbine::bind_texture(*texture);
     }

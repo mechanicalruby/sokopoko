@@ -15,8 +15,11 @@ find_package(OpenGL REQUIRED)
 # GLM
 add_subdirectory("include/glm/")
 
+# NFD
+add_subdirectory("include/nativefiledialog-extended")
+
 file(GLOB COMMON_SRC
-  # "include/yyjson/yyjson.c" # yyjson
+  "include/yyjson/yyjson.c" # yyjson
   "src/*.c"
   "src/*.cpp"
 )
@@ -52,6 +55,7 @@ target_link_libraries(${PROJECT_NAME}
   ${OPENGL_gl_LIBRARY}
   glm::glm
   glfw
+  nfd
 )
 
 # copy assets to build folder

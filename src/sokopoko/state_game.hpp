@@ -8,7 +8,7 @@
 #include "../meta.hpp"
 #include "../render_list.hpp"
 
-#include "sokoban.hpp"
+#include "soko.hpp"
 
 namespace Sokoban {
 struct GameState : public Turbine::State {

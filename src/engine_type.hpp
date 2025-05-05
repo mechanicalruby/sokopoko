@@ -45,19 +45,17 @@ public:
         (e.*func)(60);
     }
 
-    // Getter with no parameters (const) - THIS IS THE ONE FOR get_health
+    // Getter with no parameters (const)
     template<typename T, typename R>
     void register_method(const std::string& name, R (T::*func)() const, T& e) {
         R result = (e.*func)();
         printf("Health: %i\n", result);
-        // Do something with result
     }
 
     // Getter with no parameters (non-const)
     template<typename T, typename R>
     void register_method(const std::string& name, R (T::*func)(), T& e) {
         R result = (e.*func)();
-        // Do something with result
     }
 };
 }

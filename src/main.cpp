@@ -13,7 +13,7 @@
 #include "state.hpp"
 #include "engine_type.hpp"
 
-#include "sokopoko/sokoban.hpp"
+#include "sokopoko/soko.hpp"
 #include "sokopoko/state_menu.hpp"
 #include "sokopoko/state_game.hpp"
 
@@ -29,7 +29,6 @@
 
 #include <cinttypes>
 #include <vector>
-// property stuff
 
 #define USE_IMMEDIATE_MODE FALSE
 #define USE_GLES2 FALSE
@@ -37,13 +36,12 @@
 #define PLATFORM_WIN32 TRUE
 #define PLATFORM_MACOS FALSE
 #define PLATFORM_LINUX FALSE
-#define PLATFORM_PLAYSTATION_PORTABLE FALSE
 #define PLATFORM_PLAYSTATION_VITA FALSE
 
 int main(void) {
-    constexpr unsigned int INTERNAL_SCREEN_WIDTH  = 160;
-    constexpr unsigned int INTERNAL_SCREEN_HEIGHT = 120;
-    unsigned int WINDOW_SCALE = 6;
+    constexpr unsigned int INTERNAL_SCREEN_WIDTH  = 320;
+    constexpr unsigned int INTERNAL_SCREEN_HEIGHT = 240;
+    unsigned int WINDOW_SCALE = 3;
 
     Turbine::Registry registry;
     // Example::register_class(registry);
@@ -53,10 +51,10 @@ int main(void) {
     registry.register_method("get_health", &Example::get_health, e);
     
     Turbine::Window window {};
-    Turbine::init_window(window, "Make Me Rich", INTERNAL_SCREEN_WIDTH * WINDOW_SCALE,
+    Turbine::init_window(window, "Sokopoko! (turbine-cpp)", INTERNAL_SCREEN_WIDTH * WINDOW_SCALE,
                          INTERNAL_SCREEN_HEIGHT * WINDOW_SCALE);
 
-    Turbine::InputState input; 
+    Turbine::InputState input;
     Turbine::init_input_callbacks(input, window);
     Turbine::bind_input_defaults(input);
 
@@ -66,7 +64,7 @@ int main(void) {
 
     Turbine::Shader shader {};
     Turbine::compile_default_shader(shader);
-    Turbine::use_shader(shader);
+    Turbine::use_shader(shader);    
     Turbine::uniform_mat4(shader, "projection", glm::ortho(0.0f, (float)INTERNAL_SCREEN_WIDTH,
                                                            (float)INTERNAL_SCREEN_HEIGHT, 0.0f, 1.0f, -1.0f));
     Turbine::uniform_mat4(shader, "view", glm::mat4(1.0f));
@@ -86,21 +84,17 @@ int main(void) {
     render_target.centered = true;
     render_target.color = 0xFFFFFFFF; 
 
-    // Game states.
     Turbine::StateMachine sm;
     sm.register_state(std::make_unique<Sokoban::MenuState>(), "menu");
     sm.register_state(std::make_unique<Sokoban::GameState>(), "game");
     sm.switch_state("menu");
     
-    // Turbine::State* c_state = new Sokoban::MenuState();
-    
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
-    // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window.ptr, true);
     ImGui_ImplOpenGL3_Init();
 
@@ -110,10 +104,6 @@ int main(void) {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        
-        if(Turbine::just_pressed(input, Turbine::InputAction::UNDO)) {
-            sm.switch_state("game");
-        }
         
         sm.update(1.0f / 60.0f, input);
         
@@ -135,9 +125,7 @@ int main(void) {
 
         screen_batch.begin();
         screen_batch.queue(render_target);
-        screen_batch.draw();
-
-        // draw UI elements at screen res
+        screen_batch.end();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

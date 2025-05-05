@@ -17,7 +17,9 @@ struct SokoPosition {
 enum SokoObjectType {
     NONE,
     CRATE,
-    PLAYER
+    PLAYER,
+    BARRIER,
+    
 };
 
 // Grid bound game object
@@ -25,6 +27,7 @@ struct SokoObject {
     SokoPosition position {};
     SokoObjectType type = SokoObjectType::NONE;
     bool is_controlled = false;
+    bool hidden = false;
     
     std::string name;
     Sprite sprite;
@@ -37,7 +40,7 @@ struct Ross : public SokoObject {
     Ross(SokoPosition pos) {
         type = SokoObjectType::PLAYER;
         position = pos;
-        sprite.region = Rect{0, 0, 14, 22};
+        sprite.region = Rect{0, 170, 32, 43};
         name = "Player";
     }
 };
@@ -52,28 +55,15 @@ struct Crate : public SokoObject {
     }
 };
 
-/* MAP */
-// Freely placed and Y-sorted scene sprite
-struct Prop {
-    std::string name;
-    Sprite sprite;
-};
-
-// Rendered tilemap / scene base
-struct Map {
-    std::string name;
-    std::array<uint32_t, 4096> tiles;
-};
-
-// Scene stuff
-struct CameraTarget {
-    float x, y;
-};
-
-struct Scene {
-    std::string name;
-    Map map;
-    CameraTarget camera_target;
+struct Barrier : public SokoObject {
+    Barrier(SokoPosition pos) {
+        type = SokoObjectType::BARRIER;
+        hidden = true;
+        position = pos;
+        sprite.region = Rect{56, 75, 22, 29};
+        sprite.offset.y = 6;
+        name = "Barrier";
+    }
 };
 
 typedef std::vector<SokoObject*> ObjectList;

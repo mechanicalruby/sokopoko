@@ -21,7 +21,7 @@ enum ProgramType {
 };
 
 bool check_compile_error(GLuint object, ProgramType type);
-void compile_shader(Shader& shader, const char* vert_path, const char* frag_path);
+void compile_shader(Shader& shader, const char* vert, const char* frag);
 void use_shader(Shader& shader);
 
 void compile_default_shader(Shader& shader);
