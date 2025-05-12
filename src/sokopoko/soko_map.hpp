@@ -14,16 +14,22 @@
 namespace fs = std::filesystem;
 
 namespace Sokoban {
+struct Tilemap {
+    Texture* texture;
+    size_t starting_index;
+};
+
 struct Map {
     std::string name;
     int width, height;
     
     std::vector<uint16_t> tiles;
+    std::vector<Tilemap> tilemaps;
     Turbine::Sprite tile_sprite;
 
     ObjectList objects;
 
-    /* flags */
+    bool is_edit_mode = false;
     bool show_hidden_objects = false;
 };
 
@@ -47,6 +53,10 @@ bool save_map(Map& map, const std::string& file_path);
 void draw_map(Map& map, Turbine::Batch& batch);
 
 void change_tile(Map& map, SokoPosition position, uint16_t new_id);
+void create_object(Map& map, SokoObjectClass type, SokoPosition position);
+
+SokoObject* object_at(const ObjectList& objects, SokoPosition position);
+bool attempt_movement(ObjectList& objects, SokoObject* actor, SokoPosition destination);
 
 // File loading / NFD
 std::string save_file_prompt();

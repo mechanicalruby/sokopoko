@@ -9,6 +9,7 @@
 #include "../animation.hpp"
 #include "../render_list.hpp"
 #include "../camera.hpp"
+#include "../imgui/inspector.hpp"
 
 #include "soko.hpp"
 #include "soko_map.hpp"
@@ -19,16 +20,18 @@ struct MenuState : public Turbine::State {
 private:
     Turbine::Batch b1;
     Turbine::Batch b2;
+    Turbine::Batch b3;
     Turbine::Texture texture;
     Turbine::Texture object_texture;
     Turbine::Texture map_texture;
 
-    Turbine::Sprite sprite {};
+    Turbine::Sprite shadow_sprite {};
     Turbine::Animation anim {};
 
     Turbine::Shader f_shad;
     Turbine::Camera cam;
-    
+
+    Sokoban::SokoObject* c_actor = nullptr; // controlled actor    
     Map map;
 
     double mouse_x, mouse_y;
@@ -38,6 +41,8 @@ public:
     void init() override;
     void update(double delta_time, Turbine::InputState& input) override;
     void draw(Turbine::Window& window, Turbine::Shader& base_shader) override;
+
+    SokoObject* find_player(const ObjectList& list);
 };
 }
 

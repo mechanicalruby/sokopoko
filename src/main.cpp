@@ -39,19 +39,18 @@
 #define PLATFORM_PLAYSTATION_VITA FALSE
 
 int main(void) {
-    constexpr unsigned int INTERNAL_SCREEN_WIDTH  = 320;
+    constexpr unsigned int INTERNAL_SCREEN_WIDTH  = 400;
     constexpr unsigned int INTERNAL_SCREEN_HEIGHT = 240;
     unsigned int WINDOW_SCALE = 3;
 
     Turbine::Registry registry;
     // Example::register_class(registry);
 
-    Example e;
-    registry.register_method("set_health", &Example::set_health, e);
-    registry.register_method("get_health", &Example::get_health, e);
+    // registry.register_property("sprite", "region", &Sprite::set_region, &Sprite::get_region);
+    // registry.register_property("sprite", "scale", &Sprite::set_scale, &Sprite::get_scale);
     
     Turbine::Window window {};
-    Turbine::init_window(window, "Sokopoko! (turbine-cpp)", INTERNAL_SCREEN_WIDTH * WINDOW_SCALE,
+    Turbine::init_window(window, "Sokopoko!", INTERNAL_SCREEN_WIDTH * WINDOW_SCALE,
                          INTERNAL_SCREEN_HEIGHT * WINDOW_SCALE);
 
     Turbine::InputState input;
@@ -64,7 +63,7 @@ int main(void) {
 
     Turbine::Shader shader {};
     Turbine::compile_default_shader(shader);
-    Turbine::use_shader(shader);    
+    Turbine::use_shader(shader);
     Turbine::uniform_mat4(shader, "projection", glm::ortho(0.0f, (float)INTERNAL_SCREEN_WIDTH,
                                                            (float)INTERNAL_SCREEN_HEIGHT, 0.0f, 1.0f, -1.0f));
     Turbine::uniform_mat4(shader, "view", glm::mat4(1.0f));

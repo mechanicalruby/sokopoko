@@ -47,6 +47,10 @@ struct Sprite {
     Texture* texture;
 
     Sprite();
+
+    // setter/getter
+    void set_region(const Rect& value);
+    Rect get_region() const;
 };
 
 struct Batch {
@@ -56,9 +60,6 @@ struct Batch {
     
     size_t index_offset;
     
-    // List of all queued sprites:
-    static int g_num_sprites;
-
     Batch();
     void calculate_vertices(Sprite& sprite, size_t offset);
 

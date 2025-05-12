@@ -22,6 +22,15 @@ Sprite::Sprite() {
     texture = nullptr;
 }
 
+void Sprite::set_region(const Rect& value) {
+    // if(region == value) { return; }
+    region = value;
+};
+
+Rect Sprite::get_region() const {
+    return region;
+}
+
 void y_compare_sprites(const Sprite& a, const Sprite& b) {
 
 }
@@ -52,6 +61,10 @@ void Batch::calculate_vertices(Sprite& sprite, size_t offset) {
 
     if (texture == nullptr && sprite.texture != nullptr) {
         texture = sprite.texture;
+    }
+
+    if(texture != nullptr && sprite.texture == nullptr) {
+        sprite.texture = texture;
     }
 
     if (texture == nullptr) {

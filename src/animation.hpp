@@ -59,11 +59,14 @@ public:
     void tick(double delta_time);
     void play();
 
+    Track* add_track(TrackType type);
+
     /* properties */
     double get_current_time() { return current_time; }
     bool empty();
-private:
+
     std::vector<Track*> tracks;
+private:
     double current_time = 0.0;
     double length = 1.0;
 };

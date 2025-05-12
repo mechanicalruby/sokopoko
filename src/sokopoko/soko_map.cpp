@@ -39,15 +39,7 @@ bool load_map(Map& map, const std::string& file_path) {
         size_t idx, max;
         yyjson_val* val;
         yyjson_arr_foreach(objects_arr, idx, max, val) {
-            const char* type = yyjson_get_str(val);
             
-            switch(type) {
-            case "player":
-                map.objects.push_back(new Player{0, 0});
-                break;
-            default:
-                break;
-            }
         }
     }
     
@@ -91,6 +83,10 @@ bool save_map(Map& map, const std::string& file_path) {
         yyjson_mut_obj_add(root, tiles_key, tiles_arr);
     }
 
+    if(!map.objects.empty()) {
+        
+    }
+
     yyjson_mut_doc_set_root(doc, root);
     bool suc = yyjson_mut_write_file(file_path.c_str(), doc, YYJSON_WRITE_PRETTY, NULL, NULL);
     yyjson_mut_doc_free(doc);
@@ -130,6 +126,84 @@ void change_tile(Map& map, SokoPosition position, uint16_t new_id) {
 
     if((position.x + position.y * map.width) < map.tiles.size())
         map.tiles[position.x + position.y * map.width] = new_id;
+}
+
+void create_object(Map& map, SokoObjectClass type, SokoPosition position) {
+    switch(type) {
+    case SokoObjectClass::BARRIER:
+        map.objects.push_back(new Barrier(position));
+        break;
+    case SokoObjectClass::WOODEN_CRATE:
+        map.objects.push_back(new Crate(position));
+        break;
+    case SokoObjectClass::ROSS:
+        map.objects.push_back(new Ross(position));
+        break;
+    default:
+        return;
+    }
+}
+
+SokoObject* object_at(const ObjectList& objects, SokoPosition position) {
+    for(int i = 0; i < objects.size(); i++) {
+        if(objects[i]->position.x == position.x &&
+           objects[i]->position.y == position.y) {
+            return objects[i]; 
+        }
+    }
+    return nullptr;
+}
+
+bool attempt_movement(ObjectList& objects, SokoObject* actor, SokoPosition destination) {
+    if(actor == nullptr)
+        return false;
+    
+    auto target = object_at(objects, destination);
+    
+    if(target == nullptr) {
+        actor->position = destination;
+        return true;
+    }
+
+    if(target->behaviour == SokoObjectBehaviour::STATIC) {
+        return false;
+    }
+
+    if(target->behaviour == SokoObjectBehaviour::GOAL) {
+        actor->position = destination;
+        return true;
+    }
+    
+    if(target->behaviour == SokoObjectBehaviour::DOOR) {
+        // TODO: level loading / transitions
+    }
+
+    if(target->behaviour == SokoObjectBehaviour::CRATE) {
+        SokoPosition movement_vector = {
+            destination.x - actor->position.x,
+            destination.y - actor->position.y,
+        };
+
+        SokoPosition box_target = {
+            actor->position.x + (movement_vector.x * 2),
+            actor->position.y + (movement_vector.y * 2)
+        };
+
+        auto obstacle = object_at(objects, box_target);
+        
+        if(obstacle == nullptr) {
+            actor->position = destination;
+            target->position = box_target;
+
+            // Record transaction
+            
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    return false;   
 }
 
 std::string save_file_prompt() {

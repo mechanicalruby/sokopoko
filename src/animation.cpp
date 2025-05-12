@@ -7,6 +7,22 @@ Animation::~Animation() {
     }
 }
 
+Track* Animation::add_track(TrackType type) {
+    Track* track = nullptr;
+    
+    switch(type) {
+    case TrackType::TYPE_POSITION:
+        track = new PositionTrack();
+    case TrackType::TYPE_REGION:
+        track = new RegionTrack();
+    }
+
+    if(track != nullptr)
+        tracks.push_back(track);
+
+    return track;
+}
+
 bool Animation::empty(void) {
     return tracks.empty();
 }

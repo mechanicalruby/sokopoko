@@ -20,7 +20,7 @@ namespace Turbine {
 
 /* ANIMATION */
 
-bool imgui_draw_timeline(Animation& anim, float width = 600.0f, float height = 100.0f);
+bool imgui_draw_timeline(Animation& anim);
 
 }
 
