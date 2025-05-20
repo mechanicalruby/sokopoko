@@ -34,17 +34,25 @@ void MenuState::init() {
     
     cam.origin.x   = 400.0f / 2.0f;
     cam.origin.y   = 240.0f / 2.0f;
+    
+    // temporary hardcode
+    anim.name = "walk_s";
+    int pt = Turbine::add_track(anim, TrackType::POSITION);
+    int rt = Turbine::add_track(anim, TrackType::REGION);
+
+    Turbine::set_track_target(anim, pt, "sprite.position");
+    Turbine::position_track_insert_key(anim, pt, 0.0, Turbine::Vector2{ 0.0,  4.0});
+    Turbine::position_track_insert_key(anim, pt, 1.0, Turbine::Vector2{ 4.0,  0.0});
+    Turbine::position_track_insert_key(anim, pt, 2.0, Turbine::Vector2{ 0.0, -120.0});
+    Turbine::position_track_insert_key(anim, pt, 5.0, Turbine::Vector2{-4.0,  0.0});
+
+    Turbine::set_track_target(anim, rt, "sprite.region");
+    Turbine::region_track_insert_key(anim, rt, 0.0 , Turbine::Rect{96, 0, 32, 42});
+    Turbine::region_track_insert_key(anim, rt, 0.25, Turbine::Rect{128, 0, 32, 42});
+    Turbine::region_track_insert_key(anim, rt, 0.5 , Turbine::Rect{0,  0, 32, 42});
 
     create_object(map, SokoObjectClass::ROSS, SokoPosition{2, 2});
     c_actor = find_player(map.objects);
-
-    PositionTrack* position_track = static_cast<PositionTrack*>(anim.add_track(TrackType::TYPE_POSITION));
-    RegionTrack*   region_track   = static_cast<RegionTrack*>(anim.add_track(TrackType::TYPE_REGION));
-
-    position_track->keys.push_back(TKey<Vector2>{0.0, Vector2{ 0.0f, -2.0f}});
-    position_track->keys.push_back(TKey<Vector2>{2.0, Vector2{-2.0f,  0.0f}});
-    position_track->keys.push_back(TKey<Vector2>{2.0, Vector2{ 0.0f,  2.0f}});
-    position_track->keys.push_back(TKey<Vector2>{2.0, Vector2{ 2.0f,  0.0f}});
 }
 
 void MenuState::update(double delta_time, Turbine::InputState& input) {
@@ -54,34 +62,28 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
     cam.position.x = ((map.width  * 24.0f) - 12) / 2.0f;
     cam.position.y = ((map.height * 24.0f) - 12) / 2.0f;
 
+    current_time += delta_time * 2;
+        
     if(c_actor != nullptr && c_actor->type == SokoObjectClass::ROSS) {
         Ross* actor = static_cast<Ross*>(c_actor);
         
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_UP)) {
             attempt_movement(map.objects, actor, SokoPosition{actor->position.x, actor->position.y - 1});
-            
-            actor->step.play();
-            actor->sprite.region = Rect{32 * 2, 0, 32, 42};
         }
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_DOWN)) {
             attempt_movement(map.objects, actor, SokoPosition{actor->position.x, actor->position.y + 1});
-            
-            actor->step.play();
-            actor->sprite.region = Rect{0, 0, 32, 42};
         }
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_LEFT)) {
             attempt_movement(map.objects, actor, SokoPosition{actor->position.x - 1, actor->position.y});
-            
-            actor->step.play();
-            actor->sprite.region = Rect{32, 0, 32, 42};
             actor->sprite.flip_h = true;
         }
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_RIGHT)) {
             attempt_movement(map.objects, actor, SokoPosition{actor->position.x + 1, actor->position.y});
-            
-            actor->step.play();
-            actor->sprite.region = Rect{32, 0, 32, 42};
             actor->sprite.flip_h = false;
+        }
+
+        if(Turbine::just_pressed(input, Turbine::InputAction::UNDO)) {
+            current_time = 0.0f;
         }
     }
 
@@ -92,9 +94,17 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
     }
 
     for(auto& object : map.objects) {
-        object->sprite.position.x = static_cast<float>(object->position.x * 24);
-        object->sprite.position.y = static_cast<float>((object->position.y * 24) - 12);
+        object->sprite.position.x = static_cast<float>(std::lerp(object->sprite.position.x, object->position.x * 24, 20 * delta_time));
+        object->sprite.position.y = static_cast<float>(std::lerp(object->sprite.position.y, (object->position.y * 24) - 12, 20 * delta_time));
     }
+
+    RegionTrack* rtt = static_cast<RegionTrack*>(Turbine::get_track(anim, 1));
+    const TKey<Turbine::Rect>& a = Turbine::get_lower_bound_key<Turbine::Rect>(rtt->regions, current_time);
+    c_actor->sprite.region = a.value;
+
+    PositionTrack* ptt = static_cast<PositionTrack*>(Turbine::get_track(anim, 0));
+    const TKey<Turbine::Vector2>& b = Turbine::get_lower_bound_key<Turbine::Vector2>(ptt->positions, current_time);
+    cam.position = b.value;
 }
 
 void MenuState::draw(Turbine::Window& window, Turbine::Shader& base_shader) {

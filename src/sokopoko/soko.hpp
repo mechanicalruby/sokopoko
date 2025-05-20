@@ -3,6 +3,7 @@
 
 #include "../sprite.hpp"
 #include "../animation.hpp"
+#include "../animation_player.hpp"
 #include "../engine_type.hpp"
 #include <string>
 
@@ -61,7 +62,7 @@ struct SokoDialogue : public SokoObject {
 
 /* OBJECTS */
 struct Ross : public SokoObject {
-    Animation step;
+    AnimCollection ac;
     
     Ross(SokoPosition pos) {
         type = SokoObjectClass::ROSS;
@@ -70,11 +71,14 @@ struct Ross : public SokoObject {
         sprite.region = Rect{0, 0, 32, 42};
         // sprite.region = Rect{32, 175, 32, 43};
         name = "Player";
+
+        // play an animation
+        Turbine::play_animation(ac, "move_s");
     }
 };
 
 struct Mirage : public SokoObject {
-    Animation step;
+    AnimCollection ac;
     
     Mirage(SokoPosition pos) {
         type = SokoObjectClass::MIRAGE;
@@ -113,6 +117,6 @@ typedef std::vector<SokoObject*> ObjectList;
 
 void draw_object_shadows(const ObjectList& list);
 void add_object(ObjectList& list);
-};
+}
 
 #endif

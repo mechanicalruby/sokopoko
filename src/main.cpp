@@ -43,7 +43,7 @@ int main(void) {
     constexpr unsigned int INTERNAL_SCREEN_HEIGHT = 240;
     unsigned int WINDOW_SCALE = 3;
 
-    Turbine::Registry registry;
+    // Turbine::Registry registry;
     // Example::register_class(registry);
 
     // registry.register_property("sprite", "region", &Sprite::set_region, &Sprite::get_region);

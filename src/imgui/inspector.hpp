@@ -12,16 +12,7 @@
 #include "imgui_impl_opengl3.h"
 
 namespace Turbine {
-
-/* INTERNAL */
-
-
-/* GENERAL */
-
-/* ANIMATION */
-
 bool imgui_draw_timeline(Animation& anim);
-
 }
 
 #endif

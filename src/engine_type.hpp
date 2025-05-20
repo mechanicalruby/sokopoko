@@ -3,18 +3,20 @@
 
 #include <functional>
 #include <typeindex>
+#include <unordered_map>
 #include <any>
 
 namespace Turbine {
 template<typename T, typename V>
 struct Property {
-    std::string name;
+    uint32_t id;
     std::function<V(const T&)> getter;
     std::function<void(T&, V)> setter;
 };
 
+// struct EngineClass {};
+
 struct Registry {
-    
 public:
     Registry() = default;
 

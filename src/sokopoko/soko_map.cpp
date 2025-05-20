@@ -148,7 +148,7 @@ SokoObject* object_at(const ObjectList& objects, SokoPosition position) {
     for(int i = 0; i < objects.size(); i++) {
         if(objects[i]->position.x == position.x &&
            objects[i]->position.y == position.y) {
-            return objects[i]; 
+            return objects[i];
         }
     }
     return nullptr;

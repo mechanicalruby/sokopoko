@@ -2,9 +2,13 @@
 #define ANIMATION_HPP
 
 #include "sprite.hpp"
+#include "engine_type.hpp"
+
 #include <cassert>
 #include <algorithm>
 #include <unordered_map>
+
+// hook up animations to instances
 
 namespace Turbine {
 struct Key {
@@ -16,69 +20,88 @@ struct TKey : public Key {
     T value;
 };
 
-enum TrackType : uint8_t {
-    TYPE_POSITION,
-    TYPE_ROTATION,
-    TYPE_SCALE,
-    TYPE_REGION,
-    TYPE_AUDIO,
-    TYPE_ANIMATION,
-};
-
-enum InterpolationType : uint8_t {
-    NEAREST,
-    LINEAR
+enum TrackType {
+    POSITION,
+    ROTATION,
+    SCALE,
+    REGION
 };
 
 struct Track {
-    TrackType type = TrackType::TYPE_ANIMATION;
-    InterpolationType interpolation = InterpolationType::NEAREST;
+    std::string target;
+    TrackType type;
 };
 
 struct PositionTrack : public Track {
-    std::vector<TKey<Vector2>> keys;
-
+    std::vector<TKey<Vector2>> positions;
     PositionTrack() {
-        type = TrackType::TYPE_POSITION;
+        type = TrackType::POSITION;
     }
 };
 
 struct RegionTrack : public Track {
-    std::vector<TKey<Rect>> keys;
-
+    std::vector<TKey<Rect>> regions;
     RegionTrack() {
-        type = TrackType::TYPE_REGION;
+        type = TrackType::REGION;
     }
 };
 
 struct Animation {
-public:
-    Animation() = default;
-    ~Animation();
-
-    void tick(double delta_time);
-    void play();
-
-    Track* add_track(TrackType type);
-
-    /* properties */
-    double get_current_time() { return current_time; }
-    bool empty();
-
+    std::string name;
     std::vector<Track*> tracks;
-private:
-    double current_time = 0.0;
     double length = 1.0;
+    ~Animation();
 };
 
-struct AnimationPlayer {
-public:
-    AnimationPlayer() = default;
-    void add_animation(const std::string& name);
+int add_track(Animation& anim, TrackType type);
+void remove_track(Animation& anim, int p_track);
+
+Track* get_track(Animation& anim, int p_track);
+void set_track_target(Animation& anim, int p_track, const std::string& property_path);
+
+int position_track_insert_key(Animation& anim, int p_track, double p_time, const Vector2& position);
+int region_track_insert_key(Animation& anim, int p_track, double p_time, const Rect& region);
+
+/* templates with their definitions here. c++! */
+
+template<typename T> // compare keys to one another
+bool key_ascend_sort_comp(const TKey<T>& a, const TKey<T>& b) {
+    return a.time < b.time;
+}
+
+template<typename T> // compare a key to playhead (for lower_bound)
+bool key_playhead_lower_sort_comp(const TKey<T>& a, double t) {
+    return a.time < t;
+}
+
+template<typename T> // compare a key to playhead (for upper_bound)
+bool key_playhead_upper_sort_comp(double t, const TKey<T>& b) {
+    return t < b.time;
+}
+
+template<typename T>
+const TKey<T>& get_lower_bound_key(const std::vector<TKey<T>>& keys, double t) {
+    auto key_it = std::lower_bound(keys.begin(), keys.end(), t, key_playhead_lower_sort_comp<T>);
     
-    void play(const std::string& name);
-private:
-    std::unordered_map<std::string, Animation> animations;
-};
+    if (key_it == keys.begin()) {
+        return *key_it;
+    }
+    
+    --key_it;
+    return *key_it;
+}
+
+template<typename T>
+const TKey<T>& get_upper_bound_key(const std::vector<TKey<T>>& keys, double t) {
+    auto key_it = std::upper_bound(keys.begin(), keys.end(), t, key_playhead_upper_sort_comp<T>);
+    
+    if (key_it == keys.end()) {
+        return *key_it;
+    }
+    
+    return *key_it;
+}
+
+void sort_track(Animation& anim, int p_track);
 }
 #endif
