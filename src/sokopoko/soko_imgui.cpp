@@ -1,7 +1,7 @@
 #include "soko_imgui.hpp"
 
 namespace Sokoban {
-void imgui_map_inspect(Map& map) {
+void imgui_map_inspect(Map& map, SokoObject*& c_actor) {
     ImGui::Begin("Map");
 
     if(ImGui::Button("Load map")) {
@@ -21,13 +21,21 @@ void imgui_map_inspect(Map& map) {
     ImGui::Checkbox("Show hidden objects", &map.show_hidden_objects);
 
     ImGui::Separator(); // Objects
+    ImGui::Text("Objects");
+    ImGui::SameLine();
+    if(c_actor != nullptr) {
+        ImGui::Text("c_actor: %s", c_actor->name.c_str());
+    } else {
+        ImGui::Text("c_actor is NULL", c_actor);
+    }
 
     if(ImGui::Button("Create object")) {
-        create_object(map, SokoObjectClass::WOODEN_CRATE, SokoPosition{2, 2});
+        create_object(map, "Crate", SokoObjectClass::WOODEN_CRATE, SokoPosition{2, 2});
     }
 
     for(int i = 0; i < map.objects.size(); i++) {
         SokoObject* object = map.objects[i];
+	if(object == nullptr) { return; }
 
         if(object->hidden && !map.show_hidden_objects)
             continue;
@@ -36,6 +44,12 @@ void imgui_map_inspect(Map& map) {
         if (ImGui::TreeNode(object->name.c_str())) {
             ImGui::Text("Position: %i, %i", object->position.x, object->position.y);
             ImGui::Checkbox("Hidden", &object->hidden);
+	    
+	    if(ImGui::Button("Make c_actor")) {
+	      	c_actor = object;
+  	        printf("object %p set to pointer %p\n", c_actor, object);
+	    }
+	    
             ImGui::TreePop();
         }
         ImGui::PopID();

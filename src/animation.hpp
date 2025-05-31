@@ -53,6 +53,20 @@ struct Animation {
     ~Animation();
 };
 
+// Instances are for animation playback.
+// An object wanting to play an animation will get one of these in a queue.
+// This allows for generic, global animations that can be stacked on objects.
+
+// e.g. a flashing animation for taking damage may be played at the same time
+// as another object-specific animation (like falling over) without requiring
+// two players.
+struct AnimationInstance {
+    // Does not store the animation. This should be a handle to the game's ResourceStore.
+    Animation* anim;
+    std::string target;
+    double current_time;
+};
+
 int add_track(Animation& anim, TrackType type);
 void remove_track(Animation& anim, int p_track);
 

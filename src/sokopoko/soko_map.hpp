@@ -53,7 +53,7 @@ bool save_map(Map& map, const std::string& file_path);
 void draw_map(Map& map, Turbine::Batch& batch);
 
 void change_tile(Map& map, SokoPosition position, uint16_t new_id);
-void create_object(Map& map, SokoObjectClass type, SokoPosition position);
+SokoObject* create_object(Map& map, const std::string& name, SokoObjectClass type, SokoPosition position);
 
 SokoObject* object_at(const ObjectList& objects, SokoPosition position);
 bool attempt_movement(ObjectList& objects, SokoObject* actor, SokoPosition destination);

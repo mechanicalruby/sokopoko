@@ -2,7 +2,7 @@
 #define RESOURCE_HPP
 
 namespace Turbine {
-struct ResourceManager {
+struct ResourceStore {
     
 };
 }

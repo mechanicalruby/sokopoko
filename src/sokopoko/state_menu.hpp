@@ -18,12 +18,12 @@
 namespace Sokoban {
 struct MenuState : public Turbine::State {
 private:
-    Turbine::Batch b1 {};
-    Turbine::Batch b2 {};
-    Turbine::Batch b3 {};
-    Turbine::Texture texture {};
-    Turbine::Texture object_texture {};
-    Turbine::Texture map_texture {};
+    Turbine::Batch b1;
+    Turbine::Batch b2;
+    Turbine::Batch b3;
+    Turbine::Texture texture;
+    Turbine::Texture object_texture;
+    Turbine::Texture map_texture;
 
     Turbine::Sprite shadow_sprite {};
     Turbine::Animation anim {};

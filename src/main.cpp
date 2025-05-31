@@ -30,25 +30,11 @@
 #include <cinttypes>
 #include <vector>
 
-#define USE_IMMEDIATE_MODE FALSE
-#define USE_GLES2 FALSE
-
-#define PLATFORM_WIN32 TRUE
-#define PLATFORM_MACOS FALSE
-#define PLATFORM_LINUX FALSE
-#define PLATFORM_PLAYSTATION_VITA FALSE
-
 int main(void) {
     constexpr unsigned int INTERNAL_SCREEN_WIDTH  = 400;
     constexpr unsigned int INTERNAL_SCREEN_HEIGHT = 240;
-    unsigned int WINDOW_SCALE = 3;
-
-    // Turbine::Registry registry;
-    // Example::register_class(registry);
-
-    // registry.register_property("sprite", "region", &Sprite::set_region, &Sprite::get_region);
-    // registry.register_property("sprite", "scale", &Sprite::set_scale, &Sprite::get_scale);
-    
+    unsigned int WINDOW_SCALE = 2;
+     
     Turbine::Window window {};
     Turbine::init_window(window, "Sokopoko!", INTERNAL_SCREEN_WIDTH * WINDOW_SCALE,
                          INTERNAL_SCREEN_HEIGHT * WINDOW_SCALE);
@@ -62,7 +48,7 @@ int main(void) {
     }
 
     Turbine::Shader shader {};
-    Turbine::compile_default_shader(shader);
+    Turbine::load_shader_from_file(shader, "./res/shaders/std_gles.vert", "./res/shaders/std_gles.frag");
     Turbine::use_shader(shader);
     Turbine::uniform_mat4(shader, "projection", glm::ortho(0.0f, (float)INTERNAL_SCREEN_WIDTH,
                                                            (float)INTERNAL_SCREEN_HEIGHT, 0.0f, 1.0f, -1.0f));
@@ -70,7 +56,8 @@ int main(void) {
     Turbine::uniform_mat4(shader, "model", glm::mat4(1.0f));
     
     Turbine::Batch screen_batch {};
-    Turbine::Framebuffer fb(INTERNAL_SCREEN_WIDTH, INTERNAL_SCREEN_HEIGHT);
+    screen_batch.initialize();
+    Turbine::Framebuffer fb(512, 512); // power of 2
     screen_batch.texture = &fb.texture;
     
     Turbine::Sprite render_target {};
@@ -81,37 +68,46 @@ int main(void) {
     render_target.flip_v = true;
     render_target.region = Turbine::Rect{0.0f, 0.0f, (float)INTERNAL_SCREEN_WIDTH, (float)INTERNAL_SCREEN_HEIGHT};
     render_target.centered = true;
-    render_target.color = 0xFFFFFFFF; 
+    render_target.color = 0xFFFFFFFF;
 
-    Turbine::StateMachine sm;
+    Turbine::StateMachine sm {};
     sm.register_state(std::make_unique<Sokoban::MenuState>(), "menu");
     sm.register_state(std::make_unique<Sokoban::GameState>(), "game");
     sm.switch_state("menu");
-    
+        
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
-    ImGui_ImplGlfw_InitForOpenGL(window.ptr, true);
-    ImGui_ImplOpenGL3_Init();
+    Turbine::imgui_apply_style();
 
+    ImGui_ImplGlfw_InitForOpenGL(window.ptr, true);
+    ImGui_ImplOpenGL3_Init("#version 100"); // 100 for gles
+
+    float gTime = 0.0f;
     while (!Turbine::should_close_window(window)) {
         Turbine::poll_window(window);
-
+    	gTime += 1.0f / 60.0f;
+	
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         
         sm.update(1.0f / 60.0f, input);
         
-        Turbine::bind_framebuffer(fb);
+    	Turbine::bind_framebuffer(fb);
+        Turbine::set_viewport(0, 0, INTERNAL_SCREEN_WIDTH, INTERNAL_SCREEN_HEIGHT);
         Turbine::uniform_mat4(shader, "projection", glm::ortho(0.0f, (float)INTERNAL_SCREEN_WIDTH,
                                                                (float)INTERNAL_SCREEN_HEIGHT, 0.0f, 1.0f, -1.0f));
+        Turbine::uniform_mat4(shader, "view", glm::mat4(1.0f));
+        Turbine::uniform_mat4(shader, "model", glm::mat4(1.0f));
+
         Turbine::use_shader(shader);
-        
-        sm.draw(window, shader);
+        Turbine::clear(window, 0.0f, 0.0f, 0.0f);
+
+	sm.draw(window, shader);
         Turbine::unbind_framebuffer();
 
         // set viewport, draw framebuffer
@@ -120,14 +116,18 @@ int main(void) {
         Turbine::set_viewport(0, 0, fwidth, fheight);
         Turbine::uniform_mat4(shader, "projection", glm::ortho(0.0f, (float)fwidth,
                                                                (float)fheight, 0.0f, 1.0f, -1.0f));
+        Turbine::uniform_float(shader, "uTime", gTime);
         Turbine::clear(window, 0.0f, 0.0f, 0.0f);
-
+       
+        // render quad to screen
         screen_batch.begin();
         screen_batch.queue(render_target);
         screen_batch.end();
 
         ImGui::Render();
+	ImGui::EndFrame();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         Turbine::swap_buffers(window);
     }
 

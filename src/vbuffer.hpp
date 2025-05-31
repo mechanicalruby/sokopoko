@@ -1,6 +1,7 @@
 #ifndef VERTEX_BUFFER_HPP
 #define VERTEX_BUFFER_HPP
 
+#include <iostream>
 #include <glad/glad.h>
 #include "sprite.hpp"
 

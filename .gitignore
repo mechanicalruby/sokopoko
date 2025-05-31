@@ -2,5 +2,6 @@
 build/
 include/
 res/
+linux-build/
+psp-build/
 .dir-locals.el
-linux-build

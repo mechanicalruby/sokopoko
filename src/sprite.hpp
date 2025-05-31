@@ -56,11 +56,15 @@ struct Sprite {
 struct Batch {
     std::array<Vertex, BATCH_SIZE> vertices;
     Texture* texture;
-    uint32_t vbo, vao;
+    uint32_t vbo;
+    // uint32_t vao;
     
     size_t index_offset;
+    bool is_initialized = false;
     
-    Batch();
+    Batch() = default;
+    void initialize(void);
+  
     void calculate_vertices(Sprite& sprite, size_t offset);
 
     void queue(Sprite& sprite);

@@ -14,6 +14,18 @@ bool load_map(Map& map, const std::string& file_path) {
     if(!map.tiles.empty()) {
         map.tiles.clear();
     }
+
+    if(!map.objects.empty()) {
+        for(SokoObject* object : map.objects) {
+	    delete object;
+        }
+        map.objects.clear();
+    }
+
+    yyjson_val* name_val = yyjson_obj_get(root, "name");
+    if(yyjson_is_str(name_val)) {
+        map.name = yyjson_get_str(name_val);
+    }
     
     yyjson_val* width_val = yyjson_obj_get(root, "width");
     if(yyjson_is_int(width_val)) {
@@ -30,7 +42,9 @@ bool load_map(Map& map, const std::string& file_path) {
         size_t idx, max;
         yyjson_val* val;
         yyjson_arr_foreach(tiles_arr, idx, max, val) {
-            map.tiles.push_back(yyjson_get_int(val));
+	    if(yyjson_is_int(val)) {
+                map.tiles.push_back(yyjson_get_int(val));
+	    }
         }
     }
 
@@ -39,7 +53,37 @@ bool load_map(Map& map, const std::string& file_path) {
         size_t idx, max;
         yyjson_val* val;
         yyjson_arr_foreach(objects_arr, idx, max, val) {
-            
+	    yyjson_val* object_class = yyjson_obj_get(val, "class");
+	    yyjson_val* object_name  = yyjson_obj_get(val, "name");
+	    yyjson_val* object_x     = yyjson_obj_get(val, "x");
+	    yyjson_val* object_y     = yyjson_obj_get(val, "y");
+	    
+	    // property flags, not required
+	    yyjson_val* object_c_flag = yyjson_obj_get(val, "c_actor");
+	    bool is_c_actor = false;
+	    if(yyjson_is_bool(object_c_flag)) { is_c_actor == yyjson_get_bool(object_c_flag); }
+
+	    yyjson_val* object_hidden = yyjson_obj_get(val, "is_hidden");
+	    bool is_hidden = false;
+	    if(yyjson_is_bool(object_hidden)) { is_hidden == yyjson_get_bool(object_hidden); }
+
+	    printf("class %i, name %s, x %i, y %i\n",
+		   yyjson_get_int(object_class),
+		   yyjson_get_str(object_name),
+		   yyjson_get_int(object_x),
+		   yyjson_get_int(object_y));
+	   
+	    if(yyjson_is_int(object_class) && yyjson_is_int(object_x)
+	       && yyjson_is_int(object_y) && yyjson_is_str(object_name)) {
+	        SokoObject* obj = create_object(map,
+					      yyjson_get_str(object_name),
+					      static_cast<SokoObjectClass>(yyjson_get_int(object_class)),
+					      SokoPosition{yyjson_get_int(object_x), yyjson_get_int(object_y)});
+
+		if(obj != nullptr) {
+		    obj->hidden = is_hidden;
+		}
+            }
         }
     }
     
@@ -128,20 +172,27 @@ void change_tile(Map& map, SokoPosition position, uint16_t new_id) {
         map.tiles[position.x + position.y * map.width] = new_id;
 }
 
-void create_object(Map& map, SokoObjectClass type, SokoPosition position) {
+SokoObject* create_object(Map& map, const std::string& name, SokoObjectClass type, SokoPosition position) {
+    SokoObject* obj = nullptr;
+    
     switch(type) {
     case SokoObjectClass::BARRIER:
-        map.objects.push_back(new Barrier(position));
+        obj = new Barrier(position);
         break;
     case SokoObjectClass::WOODEN_CRATE:
-        map.objects.push_back(new Crate(position));
+        obj = new Crate(position);
         break;
     case SokoObjectClass::ROSS:
-        map.objects.push_back(new Ross(position));
+        obj = new Ross(position);
         break;
-    default:
-        return;
     }
+
+    if(obj != nullptr) {
+        obj->name = name;
+        map.objects.push_back(obj);
+    }
+
+    return obj;
 }
 
 SokoObject* object_at(const ObjectList& objects, SokoPosition position) {

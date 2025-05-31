@@ -6,6 +6,7 @@
 
 #include "sprite.hpp"
 #include <string>
+#include <cstring>
 
 namespace Turbine {
 void queue_bitmap_string(Batch& batch, const char* string, float x, float y);

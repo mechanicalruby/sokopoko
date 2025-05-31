@@ -2,6 +2,7 @@
 
 namespace Sokoban {
 void GameState::init() {
+    b1.initialize();
     Turbine::load_texture(texture, "./res/objects.png", TB_NEAREST, TB_NEAREST, false);
     b1.texture = &texture;
 

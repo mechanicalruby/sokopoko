@@ -39,18 +39,20 @@ void layer_compare_sprites(const Sprite& a, const Sprite& b) {
 
 }
 
-Batch::Batch() {
+void Batch::initialize(void) {
     texture = nullptr;
     index_offset = 0;
 
-    generate_vertex_array(&vao);
-    bind_vertex_array(vao);
-    generate_vertex_buffer(&vbo);
-    bind_vertex_buffer(vbo);
-    allocate_vertex_buffer(vbo, vertices.data(), sizeof(Vertex) * BATCH_SIZE);
-    set_vertex_attributes();
-    unbind_vertex_buffer();
-    unbind_vertex_array();
+    // generate_vertex_array(&vao);
+    // bind_vertex_array(vao);
+    Turbine::generate_vertex_buffer(&vbo);
+    Turbine::bind_vertex_buffer(vbo);
+    Turbine::allocate_vertex_buffer(vbo, vertices.data(), sizeof(Vertex) * BATCH_SIZE);
+    Turbine::set_vertex_attributes();
+    Turbine::unbind_vertex_buffer();
+    // unbind_vertex_array();
+
+    is_initialized = true;
 }
 
 void Batch::calculate_vertices(Sprite& sprite, size_t offset) {
@@ -129,6 +131,11 @@ void Batch::begin(void) {
 }
 
 void Batch::end(void) {
+    if(!is_initialized) {
+        printf("SPRITEBATCH: Was not initialized!!\n");
+        return;
+    }
+  
     if(texture != nullptr) {
         Turbine::bind_texture(*texture);
     }
@@ -136,9 +143,12 @@ void Batch::end(void) {
     // only draw what we need
     size_t upper_bound = index_offset;
 
-    Turbine::bind_vertex_array(vao);
+    // Turbine::bind_vertex_array(vao);
     Turbine::bind_vertex_buffer(vbo);
+    Turbine::set_vertex_attributes(); // GLES2 ONLY!! SINCE WE HAVE NO VAO, WE MUST REDEFINE OUR VERTEX ATTRIBS
     Turbine::update_vertex_buffer(vbo, vertices.data(), upper_bound * sizeof(Vertex), 0);
     glDrawArrays(GL_TRIANGLES, 0, (int)upper_bound);
+
+    Turbine::unbind_texture();
 }
 }

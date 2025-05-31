@@ -58,6 +58,7 @@ struct SokoObject {
 struct SokoDialogue : public SokoObject {
     std::string tooltip;
     bool auto_trigger = false;
+    // fill
 };
 
 /* OBJECTS */

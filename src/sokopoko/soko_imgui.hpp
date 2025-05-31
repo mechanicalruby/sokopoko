@@ -7,7 +7,7 @@
 #include "imgui.h"
 
 namespace Sokoban {
-void imgui_map_inspect(Map& list);
+void imgui_map_inspect(Map& list, SokoObject*& c_actor);
 }
 
 #endif

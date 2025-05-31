@@ -14,6 +14,7 @@ struct AnimCollection {
     std::unordered_map<std::string, Animation> animations;
 };
 
+bool add_animation(AnimCollection& ac, Animation& anim);
 void play_animation(AnimCollection& ac, const std::string& name);
 // void apply_track(Track* track, Property* prop);
 void apply_animation(Animation& anim, double current_time);

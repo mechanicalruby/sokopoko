@@ -7,6 +7,7 @@
 namespace Turbine {
 struct Camera {
     Vector2 position;
+    Vector2 target; // smoothing .. ?
     Vector2 origin;
     float zoom;
     float smooth;

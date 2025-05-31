@@ -3,22 +3,39 @@
 namespace Turbine {
 bool init_window(Window& window, const std::string& name, int width, int height) {
     glfwInit();
+
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+/*
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); */
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
     window.ptr = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
     if (window.ptr == nullptr) {
-        printf("Failed to initialize window.");
+        printf("Failed to initialize window.\n");
         glfwTerminate();
         return false;
     }
 
     glfwMakeContextCurrent(window.ptr);
-    gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    glfwSwapInterval(1); // vsync on
+    
+    // int version = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    // if(version == 0) {
+    //     printf("Failed to initialize OpenGL context.\n");
+    //     return false;
+    // }
+
+    int version = gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress);
+    if(version == 0) {
+        printf("Failed to initialize OpenGL ES context.\n");
+        return false;
+    }
+
+    glfwSwapInterval(0); // vsync off
 
     window.width = width;
     window.height = height;
