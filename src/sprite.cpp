@@ -43,14 +43,20 @@ void Batch::initialize(void) {
     texture = nullptr;
     index_offset = 0;
 
-    // generate_vertex_array(&vao);
-    // bind_vertex_array(vao);
+#if !TB_GRAPHICS_LEGACY
+#if !TB_GRAPHICS_GLES2
+    Turbine::generate_vertex_array(&vao);
+    Turbine::bind_vertex_array(vao);
+#endif
     Turbine::generate_vertex_buffer(&vbo);
     Turbine::bind_vertex_buffer(vbo);
     Turbine::allocate_vertex_buffer(vbo, vertices.data(), sizeof(Vertex) * BATCH_SIZE);
     Turbine::set_vertex_attributes();
     Turbine::unbind_vertex_buffer();
-    // unbind_vertex_array();
+#if !TB_GRAPHICS_GLES2
+    Turbine::unbind_vertex_array();
+#endif
+#endif
 
     is_initialized = true;
 }
@@ -143,12 +149,18 @@ void Batch::end(void) {
     // only draw what we need
     size_t upper_bound = index_offset;
 
-    // Turbine::bind_vertex_array(vao);
+#if !TB_GRAPHICS_LEGACY
+#if !TB_GRAPHICS_GLES2
+    Turbine::bind_vertex_array(vao); // comment for gles2
+#endif
     Turbine::bind_vertex_buffer(vbo);
+#if TB_GRAPHICS_GLES2
     Turbine::set_vertex_attributes(); // GLES2 ONLY!! SINCE WE HAVE NO VAO, WE MUST REDEFINE OUR VERTEX ATTRIBS
+#endif
     Turbine::update_vertex_buffer(vbo, vertices.data(), upper_bound * sizeof(Vertex), 0);
+#endif
     glDrawArrays(GL_TRIANGLES, 0, (int)upper_bound);
 
-    Turbine::unbind_texture();
+    // Turbine::unbind_texture();
 }
 }

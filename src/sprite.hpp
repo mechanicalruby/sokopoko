@@ -56,8 +56,12 @@ struct Sprite {
 struct Batch {
     std::array<Vertex, BATCH_SIZE> vertices;
     Texture* texture;
+#if !TB_GRAPHICS_LEGACY
     uint32_t vbo;
-    // uint32_t vao;
+#if !TB_GRAPHICS_GLES2
+    uint32_t vao;
+#endif
+#endif
     
     size_t index_offset;
     bool is_initialized = false;

@@ -48,7 +48,11 @@ int main(void) {
     }
 
     Turbine::Shader shader {};
+#if TB_GRAPHICS_GLES2
     Turbine::load_shader_from_file(shader, "./res/shaders/std_gles.vert", "./res/shaders/std_gles.frag");
+#else
+    Turbine::load_shader_from_file(shader, "./res/shaders/std.vert", "./res/shaders/std.frag");
+#endif
     Turbine::use_shader(shader);
     Turbine::uniform_mat4(shader, "projection", glm::ortho(0.0f, (float)INTERNAL_SCREEN_WIDTH,
                                                            (float)INTERNAL_SCREEN_HEIGHT, 0.0f, 1.0f, -1.0f));

@@ -5,6 +5,15 @@ project(Sokopoko LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# OpenGL ES 2.0 support (*PS Vita [vitaGL], Android, Emscripten)
+option(OPTION_IS_GLES2  "Target is compiled for OpenGL ES 2.0" OFF)
+# Legacy graphics support (*PSP, N3DS)
+option(OPTION_IS_LEGACY "Target only supports immediate mode graphics" OFF)
+
+if(OPTION_IS_GLES2 AND OPTION_IS_LEGACY)
+  message(FATAL_ERROR "Mutually exclusive graphics options were chosen simultaneously. Go back.")
+endif()
+
 # GLFW
 add_subdirectory("include/glfw/")
 set(GLFW_BUILD_WAYLAND OFF)
@@ -20,7 +29,6 @@ add_subdirectory("include/nativefiledialog-extended")
 
 file(GLOB COMMON_SRC
   "include/yyjson/yyjson.c" # yyjson
-  "src/*.c"
   "src/*.cpp"
 )
 
@@ -45,6 +53,13 @@ include_directories(
   "include/"
 )
 
+# Add glad_gles2.h to GLES2 builds, glad.h if not
+if(OPTION_IS_GLES2)
+  list(APPEND COMMON_SRC "src/glad_gles2.c")
+else()
+  list(APPEND COMMON_SRC "src/glad.c")
+endif()
+
 add_executable(${PROJECT_NAME}
   ${COMMON_SRC}
   ${IMGUI_SRC}
@@ -52,7 +67,8 @@ add_executable(${PROJECT_NAME}
 )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-  IMGUI_IMPL_OPENGL_ES2
+  TB_GRAPHICS_GLES2=${OPTION_IS_GLES2}
+  TB_GRAPHICS_LEGACY=${OPTION_IS_LEGACY}
 )
 
 target_link_libraries(${PROJECT_NAME}

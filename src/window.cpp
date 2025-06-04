@@ -4,12 +4,15 @@ namespace Turbine {
 bool init_window(Window& window, const std::string& name, int width, int height) {
     glfwInit();
 
+#if TB_GRAPHICS_GLES2
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-/*
+#else
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); */
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+#endif
+    
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
@@ -22,18 +25,20 @@ bool init_window(Window& window, const std::string& name, int width, int height)
     }
 
     glfwMakeContextCurrent(window.ptr);
-    
-    // int version = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    // if(version == 0) {
-    //     printf("Failed to initialize OpenGL context.\n");
-    //     return false;
-    // }
 
+#if TB_GRAPHICS_GLES2
     int version = gladLoadGLES2Loader((GLADloadproc)glfwGetProcAddress);
     if(version == 0) {
         printf("Failed to initialize OpenGL ES context.\n");
         return false;
     }
+#else
+    int version = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+    if(version == 0) {
+        printf("Failed to initialize OpenGL context.\n");
+        return false;
+    }
+#endif
 
     glfwSwapInterval(0); // vsync off
 
