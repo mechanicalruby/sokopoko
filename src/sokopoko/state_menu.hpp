@@ -5,13 +5,13 @@
 #include "../sprite.hpp"
 #include "../string.hpp"
 #include "../state.hpp"
-#include "../meta.hpp"
 #include "../render_list.hpp"
 #include "../camera.hpp"
 #include "../animation.hpp"
 #include "../imgui/inspector.hpp"
 
 #include "soko.hpp"
+#include "soko_sky.hpp"
 #include "soko_map.hpp"
 #include "soko_imgui.hpp"
 
@@ -31,6 +31,7 @@ private:
     Turbine::Shader f_shad {};
     Turbine::Camera cam {};
 
+    Sokoban::Sky sky {};
     Sokoban::SokoObject* c_actor = nullptr; // controlled actor
     Map map;
 

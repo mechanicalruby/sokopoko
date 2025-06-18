@@ -2,13 +2,11 @@
 #define ANIMATION_HPP
 
 #include "sprite.hpp"
-#include "engine_type.hpp"
+#include "registry.hpp"
 
 #include <cassert>
 #include <algorithm>
 #include <unordered_map>
-
-// hook up animations to instances
 
 namespace Turbine {
 struct Key {
@@ -51,20 +49,6 @@ struct Animation {
     std::vector<Track*> tracks;
     double length = 1.0;
     ~Animation();
-};
-
-// Instances are for animation playback.
-// An object wanting to play an animation will get one of these in a queue.
-// This allows for generic, global animations that can be stacked on objects.
-
-// e.g. a flashing animation for taking damage may be played at the same time
-// as another object-specific animation (like falling over) without requiring
-// two players.
-struct AnimationInstance {
-    // Does not store the animation. This should be a handle to the game's ResourceStore.
-    Animation* anim;
-    std::string target;
-    double current_time;
 };
 
 int add_track(Animation& anim, TrackType type);

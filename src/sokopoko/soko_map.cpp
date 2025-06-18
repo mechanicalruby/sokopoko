@@ -5,12 +5,16 @@ bool load_map(Map& map, const std::string& file_path) {
     yyjson_read_err err;
     yyjson_doc* doc = yyjson_read_file(file_path.c_str(), 0, NULL, &err);
     if(doc == NULL || err.pos != 0) {
-        printf("JSON: %s at position %zu", err.msg, err.pos);
+        printf("JSON: %s at position %zu\n", err.msg, err.pos);
         return false;
     }
 
     yyjson_val* root = yyjson_doc_get_root(doc);
 
+    for(int i = 0; i < 4; i++) {
+        map.c_actors[i] = nullptr;
+    }
+    
     if(!map.tiles.empty()) {
         map.tiles.clear();
     }
@@ -53,36 +57,42 @@ bool load_map(Map& map, const std::string& file_path) {
         size_t idx, max;
         yyjson_val* val;
         yyjson_arr_foreach(objects_arr, idx, max, val) {
-	    yyjson_val* object_class = yyjson_obj_get(val, "class");
-	    yyjson_val* object_name  = yyjson_obj_get(val, "name");
-	    yyjson_val* object_x     = yyjson_obj_get(val, "x");
-	    yyjson_val* object_y     = yyjson_obj_get(val, "y");
+            yyjson_val* object_class = yyjson_obj_get(val, "class");
+            yyjson_val* object_name  = yyjson_obj_get(val, "name");
+            yyjson_val* object_x     = yyjson_obj_get(val, "x");
+            yyjson_val* object_y     = yyjson_obj_get(val, "y");
 	    
-	    // property flags, not required
-	    yyjson_val* object_c_flag = yyjson_obj_get(val, "c_actor");
-	    bool is_c_actor = false;
-	    if(yyjson_is_bool(object_c_flag)) { is_c_actor == yyjson_get_bool(object_c_flag); }
+            // property flags, not required
+            yyjson_val* object_hidden = yyjson_obj_get(val, "is_hidden");
+            bool is_hidden = false;
+            if(yyjson_is_bool(object_hidden)) { is_hidden = yyjson_get_bool(object_hidden); }
 
-	    yyjson_val* object_hidden = yyjson_obj_get(val, "is_hidden");
-	    bool is_hidden = false;
-	    if(yyjson_is_bool(object_hidden)) { is_hidden == yyjson_get_bool(object_hidden); }
+            yyjson_val* object_c_actor_pos = yyjson_obj_get(val, "c_actor_pos");
+            int c_actor_pos = -1;
+            if(yyjson_is_int(object_c_actor_pos)) { c_actor_pos = yyjson_get_int(object_c_actor_pos); }
 
-	    printf("class %i, name %s, x %i, y %i\n",
-		   yyjson_get_int(object_class),
-		   yyjson_get_str(object_name),
-		   yyjson_get_int(object_x),
-		   yyjson_get_int(object_y));
+            printf("class %i, name %s, x %i, y %i\n",
+                   yyjson_get_int(object_class),
+                   yyjson_get_str(object_name),
+                   yyjson_get_int(object_x),
+                   yyjson_get_int(object_y));
 	   
-	    if(yyjson_is_int(object_class) && yyjson_is_int(object_x)
-	       && yyjson_is_int(object_y) && yyjson_is_str(object_name)) {
-	        SokoObject* obj = create_object(map,
-					      yyjson_get_str(object_name),
-					      static_cast<SokoObjectClass>(yyjson_get_int(object_class)),
-					      SokoPosition{yyjson_get_int(object_x), yyjson_get_int(object_y)});
+            if(yyjson_is_int(object_class) && yyjson_is_int(object_x)
+               && yyjson_is_int(object_y) && yyjson_is_str(object_name)) {
+                SokoObject* obj = create_object(map,
+                                                yyjson_get_str(object_name),
+                                                static_cast<SokoObjectClass>(yyjson_get_int(object_class)),
+                                                SokoPosition{yyjson_get_int(object_x), yyjson_get_int(object_y)});
 
-		if(obj != nullptr) {
-		    obj->hidden = is_hidden;
-		}
+                if(obj == nullptr) { continue; }
+
+                // apply properties
+                
+                obj->hidden = is_hidden;   
+                if(c_actor_pos >= 0) {
+                    map.c_actors[c_actor_pos] = obj;
+                    printf("set object to c_actor pos %i\n", c_actor_pos);
+                }
             }
         }
     }
@@ -128,7 +138,40 @@ bool save_map(Map& map, const std::string& file_path) {
     }
 
     if(!map.objects.empty()) {
-        
+        yyjson_mut_val* objects_key = yyjson_mut_str(doc, "objects");
+        yyjson_mut_val* objects_arr = yyjson_mut_arr(doc);
+
+        for(auto& obj : map.objects) {
+            yyjson_mut_val* object_def = yyjson_mut_obj(doc);
+
+            yyjson_mut_val* object_class_key = yyjson_mut_str(doc, "class");
+            yyjson_mut_val* object_class_val = yyjson_mut_int(doc, obj->type);
+            
+            yyjson_mut_val* object_name_key = yyjson_mut_str(doc, "name");
+            yyjson_mut_val* object_name_val = yyjson_mut_str(doc, obj->name.c_str());
+            
+            yyjson_mut_val* object_x_key = yyjson_mut_str(doc, "x");
+            yyjson_mut_val* object_x_val = yyjson_mut_int(doc, obj->position.x);
+
+            yyjson_mut_val* object_y_key = yyjson_mut_str(doc, "y");
+            yyjson_mut_val* object_y_val = yyjson_mut_int(doc, obj->position.y);
+
+            yyjson_mut_obj_add(object_def, object_class_key, object_class_val);
+            yyjson_mut_obj_add(object_def, object_name_key, object_name_val);
+            yyjson_mut_obj_add(object_def, object_x_key, object_x_val);
+            yyjson_mut_obj_add(object_def, object_y_key, object_y_val);
+
+            // properties
+            if(obj->hidden) {
+                yyjson_mut_val* object_hidden_key = yyjson_mut_str(doc, "is_hidden");
+                yyjson_mut_val* object_hidden_val = yyjson_mut_bool(doc, obj->hidden);
+                yyjson_mut_obj_add(object_def, object_hidden_key, object_hidden_val);
+            }
+            
+            yyjson_mut_arr_append(objects_arr, object_def);
+        }
+
+        yyjson_mut_obj_add(root, objects_key, objects_arr);
     }
 
     yyjson_mut_doc_set_root(doc, root);
@@ -144,7 +187,7 @@ void draw_map(Map& map, Turbine::Batch& batch) {
         uint16_t& tile_id = map.tiles[i];
 
         // Skip empty tiles.
-        if(tile_id == 2) {
+        if(tile_id == -1) {
             continue;
         }
 
@@ -173,17 +216,35 @@ void change_tile(Map& map, SokoPosition position, uint16_t new_id) {
 }
 
 SokoObject* create_object(Map& map, const std::string& name, SokoObjectClass type, SokoPosition position) {
-    SokoObject* obj = nullptr;
+    SokoObject* obj = new SokoObject();
     
     switch(type) {
     case SokoObjectClass::BARRIER:
-        obj = new Barrier(position);
+        obj->type = SokoObjectClass::BARRIER;
+        obj->behaviour = SokoObjectBehaviour::STATIC;
+        obj->hidden = true;
+        obj->position = position;
+        obj->sprite.region = Rect{56, 75, 22, 29};
+        obj->sprite.offset.y = 6;
         break;
     case SokoObjectClass::WOODEN_CRATE:
-        obj = new Crate(position);
+        obj->type = SokoObjectClass::WOODEN_CRATE;
+        obj->behaviour = SokoObjectBehaviour::CRATE;
+        obj->position = position;
+        obj->sprite.region = Rect{22, 84, 22, 29};
+        obj->sprite.offset.y = 6;
         break;
     case SokoObjectClass::ROSS:
-        obj = new Ross(position);
+        obj->type = SokoObjectClass::ROSS;
+        obj->behaviour = SokoObjectBehaviour::PLAYER;
+        obj->position = position;
+        obj->sprite.region = Rect{0, 0, 32, 42};
+        break;
+    case SokoObjectClass::MIRAGE:
+        obj->type = SokoObjectClass::MIRAGE;
+        obj->behaviour = SokoObjectBehaviour::NPC_FOLLOW;
+        obj->position = position;
+        obj->sprite.region = Rect{0, 42, 32, 42};
         break;
     }
 
@@ -220,7 +281,8 @@ bool attempt_movement(ObjectList& objects, SokoObject* actor, SokoPosition desti
         return false;
     }
 
-    if(target->behaviour == SokoObjectBehaviour::GOAL) {
+    if(target->behaviour == SokoObjectBehaviour::GOAL ||
+       target->behaviour == SokoObjectBehaviour::NPC_FOLLOW) {
         actor->position = destination;
         return true;
     }
@@ -242,15 +304,16 @@ bool attempt_movement(ObjectList& objects, SokoObject* actor, SokoPosition desti
 
         auto obstacle = object_at(objects, box_target);
         
-        if(obstacle == nullptr) {
+        if(obstacle != nullptr) {
+            if(obstacle->behaviour == SokoObjectBehaviour::GOAL) {
+                actor->position = destination;
+                target->position = box_target;
+                return true;
+            }
+        } else {
             actor->position = destination;
             target->position = box_target;
-
-            // Record transaction
-            
             return true;
-        } else {
-            return false;
         }
     }
     

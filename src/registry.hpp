@@ -1,5 +1,5 @@
-#ifndef ENGINE_TYPE_HPP
-#define ENGINE_TYPE_HPP
+#ifndef REGISTRY_HPP
+#define REGISTRY_HPP
 
 #include <functional>
 #include <typeindex>
@@ -13,8 +13,6 @@ struct Property {
     std::function<V(const T&)> getter;
     std::function<void(T&, V)> setter;
 };
-
-// struct EngineClass {};
 
 struct Registry {
 public:

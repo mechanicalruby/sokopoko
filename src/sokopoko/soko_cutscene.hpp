@@ -12,13 +12,6 @@ struct Cutscene {
     std::vector<CutsceneEvent> events;
 };
 
-/*
-  CutsceneManager will have references to:
-  - the ObjectList (so that it may manipulate items to play animations, move them around)
-  - the Camera (to frame scenes)
-  - 
-*/
-
 class CutsceneManager {
 public:
     CutsceneManager() = default;

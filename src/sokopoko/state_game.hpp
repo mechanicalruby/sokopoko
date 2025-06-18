@@ -5,7 +5,6 @@
 #include "../sprite.hpp"
 #include "../string.hpp"
 #include "../state.hpp"
-#include "../meta.hpp"
 #include "../render_list.hpp"
 
 #include "soko.hpp"

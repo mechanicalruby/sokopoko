@@ -20,8 +20,7 @@ enum InputAction {
     UI_UP,
     UI_DOWN,
 
-    EDITOR_PLACE_TILE,
-    
+    EDITOR_PLACE_TILE,    
     ACTION_MAX
 };
 

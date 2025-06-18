@@ -28,6 +28,9 @@ struct Map {
     Turbine::Sprite tile_sprite;
 
     ObjectList objects;
+    // list of controllable characters
+    // in Tactics, this will be controlled by game state
+    std::array<Sokoban::SokoObject*, 4> c_actors;
 
     bool is_edit_mode = false;
     bool show_hidden_objects = false;

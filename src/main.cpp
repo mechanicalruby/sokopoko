@@ -11,7 +11,8 @@
 #include "framebuffer.hpp" 
 #include "animation.hpp"
 #include "state.hpp"
-#include "engine_type.hpp"
+#include "registry.hpp"
+#include "timer.hpp"
 
 #include "sokopoko/soko.hpp"
 #include "sokopoko/state_menu.hpp"
@@ -30,13 +31,13 @@
 #include <cinttypes>
 #include <vector>
 
-int main(void) {
+int main(int argc, char *argv[]) {
     constexpr unsigned int INTERNAL_SCREEN_WIDTH  = 400;
     constexpr unsigned int INTERNAL_SCREEN_HEIGHT = 240;
-    unsigned int WINDOW_SCALE = 2;
-     
+    unsigned int WINDOW_SCALE = 3;
+    
     Turbine::Window window {};
-    Turbine::init_window(window, "Sokopoko!", INTERNAL_SCREEN_WIDTH * WINDOW_SCALE,
+    Turbine::init_window(window, "Sokopoko", INTERNAL_SCREEN_WIDTH * WINDOW_SCALE,
                          INTERNAL_SCREEN_HEIGHT * WINDOW_SCALE);
 
     Turbine::InputState input;
@@ -47,6 +48,7 @@ int main(void) {
         printf("WINDOW: Couldn't set window icon.\n");
     }
 
+#if !TB_GRAPHICS_LEGACY
     Turbine::Shader shader {};
 #if TB_GRAPHICS_GLES2
     Turbine::load_shader_from_file(shader, "./res/shaders/std_gles.vert", "./res/shaders/std_gles.frag");
@@ -58,6 +60,7 @@ int main(void) {
                                                            (float)INTERNAL_SCREEN_HEIGHT, 0.0f, 1.0f, -1.0f));
     Turbine::uniform_mat4(shader, "view", glm::mat4(1.0f));
     Turbine::uniform_mat4(shader, "model", glm::mat4(1.0f));
+#endif
     
     Turbine::Batch screen_batch {};
     screen_batch.initialize();
@@ -78,40 +81,44 @@ int main(void) {
     sm.register_state(std::make_unique<Sokoban::MenuState>(), "menu");
     sm.register_state(std::make_unique<Sokoban::GameState>(), "game");
     sm.switch_state("menu");
-        
+
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
-    Turbine::imgui_apply_style();
+    ImGui::StyleColorsClassic(&ImGui::GetStyle());
 
     ImGui_ImplGlfw_InitForOpenGL(window.ptr, true);
     ImGui_ImplOpenGL3_Init("#version 100"); // 100 for gles
 
-    float gTime = 0.0f;
+    double gTime = 0.0f;
+    double dt = 0.0f;
     while (!Turbine::should_close_window(window)) {
         Turbine::poll_window(window);
-    	gTime += 1.0f / 60.0f;
+        calculate_delta_time(dt);
+    	gTime += dt;
 	
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         
-        sm.update(1.0f / 60.0f, input);
+        sm.update(dt, input);
         
     	Turbine::bind_framebuffer(fb);
         Turbine::set_viewport(0, 0, INTERNAL_SCREEN_WIDTH, INTERNAL_SCREEN_HEIGHT);
+#if !TB_GRAPHICS_LEGACY
         Turbine::uniform_mat4(shader, "projection", glm::ortho(0.0f, (float)INTERNAL_SCREEN_WIDTH,
                                                                (float)INTERNAL_SCREEN_HEIGHT, 0.0f, 1.0f, -1.0f));
         Turbine::uniform_mat4(shader, "view", glm::mat4(1.0f));
         Turbine::uniform_mat4(shader, "model", glm::mat4(1.0f));
 
         Turbine::use_shader(shader);
+#endif
         Turbine::clear(window, 0.0f, 0.0f, 0.0f);
 
-	sm.draw(window, shader);
+        sm.draw(window, shader);
         Turbine::unbind_framebuffer();
 
         // set viewport, draw framebuffer
@@ -120,7 +127,7 @@ int main(void) {
         Turbine::set_viewport(0, 0, fwidth, fheight);
         Turbine::uniform_mat4(shader, "projection", glm::ortho(0.0f, (float)fwidth,
                                                                (float)fheight, 0.0f, 1.0f, -1.0f));
-        Turbine::uniform_float(shader, "uTime", gTime);
+        Turbine::uniform_float(shader, "uTime", static_cast<float>(gTime));
         Turbine::clear(window, 0.0f, 0.0f, 0.0f);
        
         // render quad to screen
@@ -129,7 +136,7 @@ int main(void) {
         screen_batch.end();
 
         ImGui::Render();
-	ImGui::EndFrame();
+        ImGui::EndFrame();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         Turbine::swap_buffers(window);

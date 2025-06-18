@@ -4,7 +4,7 @@
 #include "../sprite.hpp"
 #include "../animation.hpp"
 #include "../animation_player.hpp"
-#include "../engine_type.hpp"
+#include "../registry.hpp"
 #include <string>
 
 using namespace Turbine;
@@ -27,7 +27,8 @@ enum SokoObjectBehaviour : uint32_t {
     DOOR,
     GOAL,
     PLAYER,
-    NPC
+    NPC_STATIC,
+    NPC_FOLLOW
 };
 
 // Specific object definition flags.
@@ -43,13 +44,24 @@ enum SokoObjectClass : uint32_t {
     PILLOW_RED
 };
 
+enum SokoDirection : uint32_t {
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST
+};
+
 // Grid bound game object
 struct SokoObject {
     SokoPosition position {};
     SokoObjectBehaviour behaviour = SokoObjectBehaviour::STATIC;
     SokoObjectClass type = SokoObjectClass::BARRIER;
+    SokoDirection direction = SokoDirection::SOUTH;
     bool is_controlled = false;
     bool hidden = false;
+
+    // Determines NPC_FOLLOW behaviour
+    unsigned int party_position = 0;
     
     std::string name;
     Sprite sprite;
@@ -59,59 +71,6 @@ struct SokoDialogue : public SokoObject {
     std::string tooltip;
     bool auto_trigger = false;
     // fill
-};
-
-/* OBJECTS */
-struct Ross : public SokoObject {
-    AnimCollection ac;
-    
-    Ross(SokoPosition pos) {
-        type = SokoObjectClass::ROSS;
-        behaviour = SokoObjectBehaviour::PLAYER;
-        position = pos;
-        sprite.region = Rect{0, 0, 32, 42};
-        // sprite.region = Rect{32, 175, 32, 43};
-        name = "Player";
-
-        // play an animation
-        Turbine::play_animation(ac, "move_s");
-    }
-};
-
-struct Mirage : public SokoObject {
-    AnimCollection ac;
-    
-    Mirage(SokoPosition pos) {
-        type = SokoObjectClass::MIRAGE;
-        behaviour = SokoObjectBehaviour::NPC;
-        position = pos;
-        sprite.region = Rect{0, 0, 32, 42};
-        // sprite.region = Rect{32, 175, 32, 43};
-        name = "Mirage";
-    }
-};
-
-struct Crate : public SokoObject {
-    Crate(SokoPosition pos) {
-        type = SokoObjectClass::WOODEN_CRATE;
-        behaviour = SokoObjectBehaviour::CRATE;
-        position = pos;
-        sprite.region = Rect{22, 84, 22, 29};
-        sprite.offset.y = 6;
-        name = "Crate";
-    }
-};
-
-struct Barrier : public SokoObject {
-    Barrier(SokoPosition pos) {
-        type = SokoObjectClass::BARRIER;
-        behaviour = SokoObjectBehaviour::STATIC;
-        hidden = true;
-        position = pos;
-        sprite.region = Rect{56, 75, 22, 29};
-        sprite.offset.y = 6;
-        name = "Barrier";
-    }
 };
 
 typedef std::vector<SokoObject*> ObjectList;

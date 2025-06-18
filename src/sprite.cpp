@@ -61,6 +61,7 @@ void Batch::initialize(void) {
     is_initialized = true;
 }
 
+// todo: add rotation
 void Batch::calculate_vertices(Sprite& sprite, size_t offset) {
     if (offset > vertices.size() - 6) {
         std::cerr << "SPRITEBATCH: Failed to find enough space for sprite" << std::endl;

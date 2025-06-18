@@ -31,6 +31,16 @@ struct Vector2 {
     float x, y;
 };
 
+union Color {
+    struct {
+        unsigned char r;
+        unsigned char g;
+        unsigned char b;
+        unsigned char a;
+    } rgba;
+    uint32_t color;
+};
+
 struct Sprite {
     Vector2 position;
     Vector2 origin;

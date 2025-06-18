@@ -36,7 +36,9 @@ void MenuState::init() {
     cam.origin.x   = 400.0f / 2.0f;
     cam.origin.y   = 240.0f / 2.0f;
 
-    load_map(map, "/home/robbi/Desktop/test_map.json");
+    sky.initialize(&texture);
+    load_map(map, "C:/Users/robbi/Desktop/mother.json");
+    c_actor = map.c_actors[0];
     
     // temporary hardcode
     anim.name = "walk_s";
@@ -46,47 +48,73 @@ void MenuState::init() {
     Turbine::set_track_target(anim, pt, "sprite.offset");
 
     Turbine::set_track_target(anim, rt, "sprite.region");
-    Turbine::region_track_insert_key(anim, rt, 0.0 , Turbine::Rect{96, 0, 32, 42});
-    Turbine::region_track_insert_key(anim, rt, 0.25, Turbine::Rect{128, 0, 32, 42});
-    Turbine::region_track_insert_key(anim, rt, 0.5 , Turbine::Rect{0,  0, 32, 42});
+    Turbine::region_track_insert_key(anim, rt, 0.0  , Turbine::Rect{96, 0, 32, 42});
+    Turbine::region_track_insert_key(anim, rt, 0.125, Turbine::Rect{128, 0, 32, 42});
+    Turbine::region_track_insert_key(anim, rt, 0.25 , Turbine::Rect{0,  0, 32, 42});
 }
 
 void MenuState::update(double delta_time, Turbine::InputState& input) {
     mouse_x = input.mouse_x / 3; // scale
     mouse_y = input.mouse_y / 3;
 
-    cam.position.x = floor(((map.width  * 24.0f) - 12) / 2.0f);
-    cam.position.y = floor(((map.height * 24.0f) - 12) / 2.0f);
-
-    current_time += delta_time * 2;
+    current_time += delta_time;
+    cam.position = Vector2((map.width * 24.0f - 24.0f) / 2.0f, (map.height * 24.0f - 24.0f) / 2.0f);
 
     if(c_actor != nullptr) {
         SokoObject* actor = c_actor;
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_UP)) {
-            attempt_movement(map.objects, actor, SokoPosition{actor->position.x, actor->position.y - 1});
+            SokoPosition last = actor->position;
+            if(attempt_movement(map.objects, actor, SokoPosition{actor->position.x, actor->position.y - 1})) {
+                for(SokoObject* obj : map.objects) {
+                    if(obj->behaviour == SokoObjectBehaviour::NPC_FOLLOW) {
+                        obj->position = last;
+                    }
+                }
+            }
             current_time = 0.0f;
         }
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_DOWN)) {
-            attempt_movement(map.objects, actor, SokoPosition{actor->position.x, actor->position.y + 1});
+            SokoPosition last = actor->position;
+            if(attempt_movement(map.objects, actor, SokoPosition{actor->position.x, actor->position.y + 1})) {
+                for(SokoObject* obj : map.objects) {
+                    if(obj->behaviour == SokoObjectBehaviour::NPC_FOLLOW) {
+                        obj->position = last;
+                    }
+                }
+            }
             current_time = 0.0f;
         }
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_LEFT)) {
-            attempt_movement(map.objects, actor, SokoPosition{actor->position.x - 1, actor->position.y});
+            SokoPosition last = actor->position;
+            if(attempt_movement(map.objects, actor, SokoPosition{actor->position.x - 1, actor->position.y})) {
+                for(SokoObject* obj : map.objects) {
+                    if(obj->behaviour == SokoObjectBehaviour::NPC_FOLLOW) {
+                        obj->position = last;
+                    }
+                }
+            }
             actor->sprite.flip_h = true;
             current_time = 0.0f;
         }
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_RIGHT)) {
-            attempt_movement(map.objects, actor, SokoPosition{actor->position.x + 1, actor->position.y});
+            SokoPosition last = actor->position;
+            if(attempt_movement(map.objects, actor, SokoPosition{actor->position.x + 1, actor->position.y})) {
+                for(SokoObject* obj : map.objects) {
+                    if(obj->behaviour == SokoObjectBehaviour::NPC_FOLLOW) {
+                        obj->position = last;
+                    }
+                }
+            }
             actor->sprite.flip_h = false;
             current_time = 0.0f;
         }
     }
 
     for(auto& object : map.objects) {
-        object->sprite.position.x = object->position.x * 24;
-        object->sprite.position.y = (object->position.y * 24) - 12;
+        object->sprite.position.x = std::lerp(object->sprite.position.x, object->position.x * 24, 25 * delta_time);
+        object->sprite.position.y = std::lerp(object->sprite.position.y, (object->position.y * 24) - 12, 25 * delta_time);
     }
-
+    
     RegionTrack* rtt = static_cast<RegionTrack*>(Turbine::get_track(anim, 1));
     if(!rtt->regions.empty()) {
         const TKey<Turbine::Rect>& a = Turbine::get_lower_bound_key<Turbine::Rect>(rtt->regions, current_time);
@@ -102,11 +130,21 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
             c_actor->sprite.offset = b.value;
         }
     }
+
+    std::sort(map.objects.begin(), map.objects.end(), [](SokoObject* a, SokoObject* b) {
+            return a->sprite.position.y < b->sprite.position.y;
+        });
+
+    cam.position.x = floor(cam.position.x);
+    cam.position.y = floor(cam.position.y);
 }
 
 void MenuState::draw(Turbine::Window& window, Turbine::Shader& base_shader) {
     Turbine::clear(window, 0.0f, 0.0f, 0.0f);
     Turbine::set_blend_mode(window);
+
+    Turbine::reset_camera(cam, base_shader);
+    sky.render();
 
     Turbine::apply_camera(cam, base_shader);
     draw_map(map, b1);
@@ -132,15 +170,19 @@ void MenuState::draw(Turbine::Window& window, Turbine::Shader& base_shader) {
         b2.queue(shadow_sprite);
         b2.queue(object->sprite);
     }
+    
     b2.end();
     
     Turbine::reset_camera(cam, base_shader);
 
     b3.begin();
-    Turbine::queue_bitmap_string(b3, "Hahaha, that's funny.\nUhh.. maybe we should talk about that later.", 0, 0);
+    Turbine::queue_bitmap_string(b3, "Sokopoko! pre-alpha\nTactics Build", 0, 0);
     b3.end();
 
-    Turbine::imgui_draw_timeline(anim);
-    Sokoban::imgui_map_inspect(map, c_actor);
+    // Turbine::imgui_draw_timeline(anim);
+    Sokoban::imgui_map_inspect(map, c_actor, sky);
+    ImGui::Begin("debug");
+    ImGui::Text("current time: %f", current_time);
+    ImGui::End();
 }
 }

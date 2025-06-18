@@ -1,4 +1,4 @@
- #include "animation.hpp"
+#include "animation.hpp"
 
 namespace Turbine {
 Animation::~Animation() {
