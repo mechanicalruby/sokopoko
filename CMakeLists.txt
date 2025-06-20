@@ -15,20 +15,20 @@ if(OPTION_IS_GLES2 AND OPTION_IS_LEGACY)
 endif()
 
 # GLFW
-add_subdirectory("include/glfw/")
+add_subdirectory("ext/glfw/")
 set(GLFW_BUILD_WAYLAND OFF)
 
 # OpenGL
 find_package(OpenGL REQUIRED)
 
 # GLM
-add_subdirectory("include/glm/")
+add_subdirectory("ext/glm/")
 
 # NFD
-add_subdirectory("include/nativefiledialog-extended")
+add_subdirectory("ext/nativefiledialog-extended")
 
 file(GLOB COMMON_SRC
-  "include/yyjson/yyjson.c" # yyjson
+  "ext/yyjson/yyjson.c" # yyjson
   "src/*.cpp"
 )
 
@@ -37,9 +37,9 @@ file(GLOB SOKOPOKO_SRC
 )
 
 file(GLOB IMGUI_SRC
-  "include/imgui/*.cpp"
-  "include/imgui/backends/imgui_impl_glfw.cpp"
-  "include/imgui/backends/imgui_impl_opengl3.cpp"
+  "ext/imgui/*.cpp"
+  "ext/imgui/backends/imgui_impl_glfw.cpp"
+  "ext/imgui/backends/imgui_impl_opengl3.cpp"
 
   # Custom
   "src/imgui/*.cpp"
@@ -48,9 +48,9 @@ file(GLOB IMGUI_SRC
 include_directories(
   ${OPENGL_INCLUDE_DIR}
   ${GLFW3_INCLUDE_DIR}
-  "include/imgui/"
-  "include/imgui/backends"
-  "include/"
+  "ext/imgui/"
+  "ext/imgui/backends"
+  "ext/"
 )
 
 # Add glad_gles2.h to GLES2 builds, glad.h if not
