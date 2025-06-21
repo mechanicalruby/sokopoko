@@ -8,6 +8,7 @@
 #include "../render_list.hpp"
 #include "../camera.hpp"
 #include "../animation.hpp"
+#include "../atlas.hpp"
 #include "../imgui/inspector.hpp"
 
 #include "soko.hpp"
@@ -30,6 +31,8 @@ private:
 
     Turbine::Shader f_shad {};
     Turbine::Camera cam {};
+
+    Turbine::Atlas atlas {};
 
     Sokoban::Sky sky {};
     Sokoban::SokoObject* c_actor = nullptr; // controlled actor

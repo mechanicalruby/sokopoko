@@ -96,7 +96,7 @@ void imgui_map_inspect(Map& map, SokoObject*& c_actor, Sky& sky) {
         try {
             object = map.objects.at(selection);
         } catch (const std::out_of_range& e) {
-            std::cout << "Exception: " << e.what() << std::endl;
+            // std::cout << "Exception: " << e.what() << std::endl;
         }
 
         if(object != nullptr) { 
