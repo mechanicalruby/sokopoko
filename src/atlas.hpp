@@ -1,5 +1,5 @@
-#ifndef RESOURCE_HPP
-#define RESOURCE_HPP
+#ifndef ATLAS_HPP
+#define ATLAS_HPP
 
 #include "sprite.hpp"
 
