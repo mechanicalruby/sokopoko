@@ -27,8 +27,7 @@ private:
     Turbine::Texture map_texture;
 
     Turbine::Sprite shadow_sprite {};
-    Turbine::Animation anim {};
-
+    
     Turbine::Shader f_shad {};
     Turbine::Camera cam {};
 

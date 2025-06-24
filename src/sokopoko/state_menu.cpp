@@ -41,25 +41,12 @@ void MenuState::init() {
     sky.initialize(&texture);
     load_map(map, "./res/level/mother.json");
     c_actor = map.c_actors[0];
-    
-    // temporary hardcode
-    anim.name = "walk_s";
-    int pt = Turbine::add_track(anim, TrackType::POSITION);
-    int rt = Turbine::add_track(anim, TrackType::REGION);
-
-    Turbine::set_track_target(anim, pt, "sprite.offset");
-
-    Turbine::set_track_target(anim, rt, "sprite.region");
-    Turbine::region_track_insert_key(anim, rt, 0.0  , Turbine::Rect{96, 0, 32, 42});
-    Turbine::region_track_insert_key(anim, rt, 0.125, Turbine::Rect{128, 0, 32, 42});
-    Turbine::region_track_insert_key(anim, rt, 0.25 , Turbine::Rect{0,  0, 32, 42});
 }
 
 void MenuState::update(double delta_time, Turbine::InputState& input) {
     mouse_x = input.mouse_x / 3; // scale
     mouse_y = input.mouse_y / 3;
 
-    current_time += delta_time;
     cam.position = Vector2((map.width * 24.0f - 24.0f) / 2.0f, (map.height * 24.0f - 24.0f) / 2.0f);
 
     if(c_actor != nullptr) {
@@ -73,7 +60,6 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
                     }
                 }
             }
-            atlas.set_region(actor->sprite, "ross_idle_n0");
         }
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_DOWN)) {
             SokoPosition last = actor->position;
@@ -84,7 +70,6 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
                     }
                 }
             }
-            atlas.set_region(actor->sprite, "ross_idle_s0");
         }
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_LEFT)) {
             SokoPosition last = actor->position;
@@ -95,8 +80,6 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
                     }
                 }
             }
-            atlas.set_region(actor->sprite, "ross_idle_e0");
-            actor->sprite.flip_h = true;
         }
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_RIGHT)) {
             SokoPosition last = actor->position;
@@ -107,8 +90,6 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
                     }
                 }
             }
-            atlas.set_region(actor->sprite, "p_bush_0");
-            actor->sprite.flip_h = false;
         }
     }
 
@@ -117,24 +98,6 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
         object->sprite.position.y = std::lerp(object->sprite.position.y, (object->position.y * 24) - 12, 25 * delta_time);
     }
     
-    /*
-    RegionTrack* rtt = static_cast<RegionTrack*>(Turbine::get_track(anim, 1));
-    if(!rtt->regions.empty()) {
-        const TKey<Turbine::Rect>& a = Turbine::get_lower_bound_key<Turbine::Rect>(rtt->regions, current_time);
-    	if(c_actor != nullptr) {
-	        c_actor->sprite.region = a.value;
-	    }
-    }
-
-    PositionTrack* ptt = static_cast<PositionTrack*>(Turbine::get_track(anim, 0));
-    if(!ptt->positions.empty()) {
-        const TKey<Turbine::Vector2>& b = Turbine::get_lower_bound_key<Turbine::Vector2>(ptt->positions, current_time);
-	    if(c_actor != nullptr) {
-            c_actor->sprite.offset = b.value;
-        }
-    }
-    */
-
     std::sort(map.objects.begin(), map.objects.end(), [](SokoObject* a, SokoObject* b) {
             return a->sprite.position.y < b->sprite.position.y;
         });
@@ -178,15 +141,6 @@ void MenuState::draw(Turbine::Window& window, Turbine::Shader& base_shader) {
     b2.end();
     
     Turbine::reset_camera(cam, base_shader);
-
-    b3.begin();
-    // Turbine::queue_bitmap_string(b3, "Sokopoko! pre-alpha\nTactics Build", 0, 0);
-    b3.end();
-
-    // Turbine::imgui_draw_timeline(anim);
     Sokoban::imgui_map_inspect(map, c_actor, sky);
-    ImGui::Begin("debug");
-    ImGui::Text("current time: %f", current_time);
-    ImGui::End();
 }
 }
