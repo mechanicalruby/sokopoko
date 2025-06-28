@@ -52,22 +52,17 @@ void imgui_map_inspect(Map& map, SokoObject*& c_actor, Sky& sky) {
     
     ImGui::Separator(); // Objects
     ImGui::Text("Objects");
-    ImGui::SameLine();
-    if(c_actor != nullptr) {
-        ImGui::Text("c_actor: %s", c_actor->name.c_str());
-    } else {
-        ImGui::Text("c_actor is NULL", c_actor);
-    }
 
     static int selection = 0;
+    if(selection < 0 || selection > map.objects.size()) {
+        selection = 0;
+    }
+    
     ImGui::PushItemWidth(-1);
     if (ImGui::BeginListBox("##objectlist")) {
         for (int i = 0; i < map.objects.size(); i++) {
-            SokoObject* object = map.objects[i];
-            if (object == nullptr) {
-                ImGui::EndListBox();
-                return;
-            }
+            SokoObject* object = &map.objects[i];
+            
             if (object->hidden && !map.show_hidden_objects)
                 continue;
 
@@ -94,7 +89,7 @@ void imgui_map_inspect(Map& map, SokoObject*& c_actor, Sky& sky) {
     {
         SokoObject* object = nullptr;
         try {
-            object = map.objects.at(selection);
+            object = &map.objects.at(selection);
         } catch (const std::out_of_range& e) {
             // std::cout << "Exception: " << e.what() << std::endl;
         }
@@ -112,8 +107,15 @@ void imgui_map_inspect(Map& map, SokoObject*& c_actor, Sky& sky) {
             ImGui::DragInt("y", &object->position.y, 0.25f);
             ImGui::Checkbox("Hidden", &object->hidden);
 
+            // Movement state info
+            static const char* state_labels[] = {
+                "IDLE", "IN_TRANSIT"
+            };
+            ImGui::Text("move state: %s", state_labels[object->state]);
+            ImGui::Text("move progr: %f", object->move_progress);
+
             // Behaviour dropdown
-            const char* behaviour_labels[] = {
+            static const char* behaviour_labels[] = {
                 "STATIC", "CRATE", "DOOR", "GOAL", "PLAYER", "NPC_STATIC", "NPC_FOLLOW"
             };
             int behaviour_index = static_cast<int>(object->behaviour);
@@ -122,7 +124,7 @@ void imgui_map_inspect(Map& map, SokoObject*& c_actor, Sky& sky) {
             }
 
             // Direction dropdown
-            const char* direction_labels[] = {
+            static const char* direction_labels[] = {
                 "NORTH", "EAST", "SOUTH", "WEST"
             };
             int direction_index = static_cast<int>(object->direction);
@@ -156,5 +158,9 @@ void imgui_map_inspect(Map& map, SokoObject*& c_actor, Sky& sky) {
 
     if(map.height <= 0)
         map.height = 1;
+}
+
+void imgui_tile_inspect(Map& map) {
+    
 }
 }

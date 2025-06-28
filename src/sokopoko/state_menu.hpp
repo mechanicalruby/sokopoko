@@ -36,11 +36,9 @@ private:
     Sokoban::Sky sky {};
     Sokoban::SokoObject* c_actor = nullptr; // controlled actor
     Map map;
-
+    
     double mouse_x, mouse_y;
-    double current_time = 0.0f;
-
-    SokoObject* find_player(const ObjectList& list);
+    void move_player();
 public:
     MenuState() = default;
     ~MenuState();
