@@ -35,6 +35,7 @@ private:
 
     Sokoban::Sky sky {};
     Sokoban::SokoObject* c_actor = nullptr; // controlled actor
+    std::vector<Turbine::Sprite*> sprite_list;
     Map map;
     
     double mouse_x, mouse_y;

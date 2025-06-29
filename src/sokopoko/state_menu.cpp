@@ -72,9 +72,32 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
         object.sprite.position.x = std::lerp(object.sprite.position.x, object.position.x * 24, 25 * delta_time);
         object.sprite.position.y = std::lerp(object.sprite.position.y, (object.position.y * 24) - 12, 25 * delta_time);
     }
-    
-    std::sort(map.objects.begin(), map.objects.end(), [](SokoObject& a, SokoObject& b) {
-            return a.sprite.position.y < b.sprite.position.y;
+
+    // Update sprite list
+    sprite_list.clear();
+    sprite_list.reserve(map.objects.size() * 2);
+    for (SokoObject& object : map.objects) {
+        if(object.hidden) {
+            if(map.show_hidden_objects) {
+                object.sprite.color = 0x50FFFFFF;
+                object.sprite.visible = true;
+                shadow_sprite.visible = true;
+            } else {
+                object.sprite.visible = false;
+                shadow_sprite.visible = false;
+            }
+        } else {
+            shadow_sprite.visible = true;
+            object.sprite.color = 0xFFFFFFFF;
+        }
+        
+        shadow_sprite.position = object.sprite.position;
+        sprite_list.push_back(&shadow_sprite);
+        sprite_list.push_back(&object.sprite);
+    }
+
+    std::sort(sprite_list.begin(), sprite_list.end(), [](const Sprite* a, const Sprite* b) {
+            return a->position.y < b->position.y;
         });
 
     cam.position.x = floor(cam.position.x);
@@ -92,27 +115,9 @@ void MenuState::draw(Turbine::Window& window, Turbine::Shader& base_shader) {
     draw_map(map, b1);
 
     b2.begin();
-    for(SokoObject& object : map.objects) {
-        if(object.hidden) {
-            if(map.show_hidden_objects) {
-                object.sprite.color = 0x50FFFFFF;
-                object.sprite.visible = true;
-                shadow_sprite.visible = true;
-            } else {
-                object.sprite.visible = false;
-                shadow_sprite.visible = false;
-            }
-        } else {
-            shadow_sprite.visible = true;
-            object.sprite.color = 0xFFFFFFFF;
-        }
-        
-        shadow_sprite.position = object.sprite.position;
-        
-        b2.queue(shadow_sprite);
-        b2.queue(object.sprite);
+    for(Turbine::Sprite* sprite : sprite_list) {        
+        b2.queue(*sprite);
     }
-    
     b2.end();
     
     Turbine::reset_camera(cam, base_shader);
