@@ -81,18 +81,13 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
             if(map.show_hidden_objects) {
                 object.sprite.color = 0x50FFFFFF;
                 object.sprite.visible = true;
-                shadow_sprite.visible = true;
             } else {
                 object.sprite.visible = false;
-                shadow_sprite.visible = false;
             }
         } else {
-            shadow_sprite.visible = true;
             object.sprite.color = 0xFFFFFFFF;
         }
         
-        shadow_sprite.position = object.sprite.position;
-        sprite_list.push_back(&shadow_sprite);
         sprite_list.push_back(&object.sprite);
     }
 
@@ -115,6 +110,22 @@ void MenuState::draw(Turbine::Window& window, Turbine::Shader& base_shader) {
     draw_map(map, b1);
 
     b2.begin();
+    // Shadow pass
+    for (SokoObject& object : map.objects) {
+        if(object.hidden) {
+            if(map.show_hidden_objects) {
+                shadow_sprite.visible = true;
+            } else {
+                shadow_sprite.visible = false;
+            }
+        } else {
+            shadow_sprite.visible = true;
+        }
+        
+        shadow_sprite.position = object.sprite.position;
+        b2.queue(shadow_sprite);
+    }    
+    // Sprite pass
     for(Turbine::Sprite* sprite : sprite_list) {        
         b2.queue(*sprite);
     }
