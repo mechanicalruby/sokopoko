@@ -9,7 +9,6 @@ using namespace Turbine;
 namespace Sokoban {
 struct Sky {
     Batch batch;
-    Texture* texture;
     Vector2 size;
     Rect uv;
     Color top_color;
