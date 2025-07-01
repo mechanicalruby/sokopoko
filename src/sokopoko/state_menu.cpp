@@ -16,6 +16,11 @@ SokoObject* MenuState::find_player(const ObjectList& list) {
     return nullptr;
 }
 
+void MenuState::move_player() {
+    attempt_movement(map.objects, c_actor, {c_actor->position.x + dir_to_vec(c_actor->direction).x,
+                                            c_actor->position.y + dir_to_vec(c_actor->direction).y});
+}
+
 void MenuState::init() {
     b1.initialize();
     b2.initialize();
@@ -50,46 +55,27 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
     cam.position = Vector2((map.width * 24.0f - 24.0f) / 2.0f, (map.height * 24.0f - 24.0f) / 2.0f);
 
     if(c_actor != nullptr) {
-        SokoObject* actor = c_actor;
-        if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_UP)) {
-            SokoPosition last = actor->position;
-            if(attempt_movement(map.objects, actor, SokoPosition{actor->position.x, actor->position.y - 1})) {
-                for(SokoObject* obj : map.objects) {
-                    if(obj->behaviour == SokoObjectBehaviour::NPC_FOLLOW) {
-                        obj->position = last;
-                    }
-                }
-            }
-        }
-        if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_DOWN)) {
-            SokoPosition last = actor->position;
-            if(attempt_movement(map.objects, actor, SokoPosition{actor->position.x, actor->position.y + 1})) {
-                for(SokoObject* obj : map.objects) {
-                    if(obj->behaviour == SokoObjectBehaviour::NPC_FOLLOW) {
-                        obj->position = last;
-                    }
-                }
-            }
+        if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_RIGHT)) {
+            c_actor->direction = SokoDirection::EAST;
+            c_actor->sprite.flip_h = false;
+            atlas.set_region(c_actor->sprite, "ross_lost_idle_e0");
+            move_player();
         }
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_LEFT)) {
-            SokoPosition last = actor->position;
-            if(attempt_movement(map.objects, actor, SokoPosition{actor->position.x - 1, actor->position.y})) {
-                for(SokoObject* obj : map.objects) {
-                    if(obj->behaviour == SokoObjectBehaviour::NPC_FOLLOW) {
-                        obj->position = last;
-                    }
-                }
-            }
+            c_actor->direction = SokoDirection::WEST;
+            c_actor->sprite.flip_h = true;
+            atlas.set_region(c_actor->sprite, "ross_lost_idle_e0");
+            move_player();
         }
-        if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_RIGHT)) {
-            SokoPosition last = actor->position;
-            if(attempt_movement(map.objects, actor, SokoPosition{actor->position.x + 1, actor->position.y})) {
-                for(SokoObject* obj : map.objects) {
-                    if(obj->behaviour == SokoObjectBehaviour::NPC_FOLLOW) {
-                        obj->position = last;
-                    }
-                }
-            }
+        if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_UP)) {
+            c_actor->direction = SokoDirection::NORTH;
+            atlas.set_region(c_actor->sprite, "ross_lost_idle_n0");
+            move_player();
+        }
+        if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_DOWN)) {
+            c_actor->direction = SokoDirection::SOUTH;
+            atlas.set_region(c_actor->sprite, "ross_lost_idle_s0");
+            move_player();
         }
     }
 
@@ -98,10 +84,28 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
         object->sprite.position.y = std::lerp(object->sprite.position.y, (object->position.y * 24) - 12, 25 * delta_time);
     }
     
-    std::sort(map.objects.begin(), map.objects.end(), [](SokoObject* a, SokoObject* b) {
-            return a->sprite.position.y < b->sprite.position.y;
-        });
+    // Update sprite list
+    sprite_list.clear();
+    sprite_list.reserve(map.objects.size() * 2);
+    for (SokoObject* object : map.objects) {
+        if(object->hidden) {
+            if(map.show_hidden_objects) {
+                object->sprite.color = 0x50FFFFFF;
+                object->sprite.visible = true;
+            } else {
+                object->sprite.visible = false;
+            }
+        } else {
+            object->sprite.color = 0xFFFFFFFF;
+        }
+        
+        sprite_list.push_back(&object->sprite);
+    }
 
+    std::sort(sprite_list.begin(), sprite_list.end(), [](const Sprite* a, const Sprite* b) {
+        return a->position.y < b->position.y;
+    });
+    
     cam.position.x = floor(cam.position.x);
     cam.position.y = floor(cam.position.y);
 }
@@ -117,27 +121,25 @@ void MenuState::draw(Turbine::Window& window, Turbine::Shader& base_shader) {
     draw_map(map, b1);
 
     b2.begin();
-    for(SokoObject* object : map.objects) {
+    // Shadow pass
+    for (SokoObject* object : map.objects) {
         if(object->hidden) {
             if(map.show_hidden_objects) {
-                object->sprite.color = 0x50FFFFFF;
-                object->sprite.visible = true;
                 shadow_sprite.visible = true;
             } else {
-                object->sprite.visible = false;
                 shadow_sprite.visible = false;
             }
         } else {
             shadow_sprite.visible = true;
-            object->sprite.color = 0xFFFFFFFF;
         }
         
         shadow_sprite.position = object->sprite.position;
-        
         b2.queue(shadow_sprite);
-        b2.queue(object->sprite);
+    }    
+    // Sprite pass
+    for(Turbine::Sprite* sprite : sprite_list) {        
+        b2.queue(*sprite);
     }
-    
     b2.end();
     
     Turbine::reset_camera(cam, base_shader);

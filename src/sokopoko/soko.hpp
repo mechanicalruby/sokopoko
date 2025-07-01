@@ -74,9 +74,7 @@ struct SokoDialogue : public SokoObject {
 };
 
 typedef std::vector<SokoObject*> ObjectList;
-
-void draw_object_shadows(const ObjectList& list);
-void add_object(ObjectList& list);
+SokoPosition dir_to_vec(SokoDirection direction);
 }
 
 #endif
