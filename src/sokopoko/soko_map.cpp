@@ -20,6 +20,9 @@ bool load_map(Map& map, const std::string& file_path) {
     }
 
     if(!map.objects.empty()) {
+        for(SokoObject* object : map.objects) {
+	    delete object;
+        }
         map.objects.clear();
     }
 
@@ -85,12 +88,31 @@ bool load_map(Map& map, const std::string& file_path) {
 
                 // apply properties
                 
-                obj->hidden = is_hidden;   
+                obj->hidden = is_hidden;
                 if(c_actor_pos >= 0) {
                     map.c_actors[c_actor_pos] = obj;
                     printf("set object to c_actor pos %i\n", c_actor_pos);
                 }
             }
+        }
+    }
+
+    yyjson_val* cam_regions_arr = yyjson_obj_get(root, "cam_regions");
+    if(yyjson_is_arr(cam_regions_arr)) {
+        size_t idx, max;
+        yyjson_val* val;
+        yyjson_arr_foreach(objects_arr, idx, max, val) {
+            yyjson_val* cam_region_x      = yyjson_obj_get(val, "x");
+            yyjson_val* cam_region_y      = yyjson_obj_get(val, "y");
+            yyjson_val* cam_region_width  = yyjson_obj_get(val, "width");
+            yyjson_val* cam_region_height = yyjson_obj_get(val, "height");
+
+            map.cam_regions.push_back(SokoRegion{
+                    .x = yyjson_get_int(cam_region_x),
+                    .y = yyjson_get_int(cam_region_y),
+                    .width = yyjson_get_int(cam_region_width),
+                    .height = yyjson_get_int(cam_region_height),
+                });
         }
     }
     
@@ -142,16 +164,16 @@ bool save_map(Map& map, const std::string& file_path) {
             yyjson_mut_val* object_def = yyjson_mut_obj(doc);
 
             yyjson_mut_val* object_class_key = yyjson_mut_str(doc, "class");
-            yyjson_mut_val* object_class_val = yyjson_mut_int(doc, obj.type);
+            yyjson_mut_val* object_class_val = yyjson_mut_int(doc, obj->type);
             
             yyjson_mut_val* object_name_key = yyjson_mut_str(doc, "name");
-            yyjson_mut_val* object_name_val = yyjson_mut_str(doc, obj.name.c_str());
+            yyjson_mut_val* object_name_val = yyjson_mut_str(doc, obj->name.c_str());
             
             yyjson_mut_val* object_x_key = yyjson_mut_str(doc, "x");
-            yyjson_mut_val* object_x_val = yyjson_mut_int(doc, obj.position.x);
+            yyjson_mut_val* object_x_val = yyjson_mut_int(doc, obj->position.x);
 
             yyjson_mut_val* object_y_key = yyjson_mut_str(doc, "y");
-            yyjson_mut_val* object_y_val = yyjson_mut_int(doc, obj.position.y);
+            yyjson_mut_val* object_y_val = yyjson_mut_int(doc, obj->position.y);
 
             yyjson_mut_obj_add(object_def, object_class_key, object_class_val);
             yyjson_mut_obj_add(object_def, object_name_key, object_name_val);
@@ -159,9 +181,9 @@ bool save_map(Map& map, const std::string& file_path) {
             yyjson_mut_obj_add(object_def, object_y_key, object_y_val);
 
             // properties
-            if(obj.hidden) {
+            if(obj->hidden) {
                 yyjson_mut_val* object_hidden_key = yyjson_mut_str(doc, "is_hidden");
-                yyjson_mut_val* object_hidden_val = yyjson_mut_bool(doc, obj.hidden);
+                yyjson_mut_val* object_hidden_val = yyjson_mut_bool(doc, obj->hidden);
                 yyjson_mut_obj_add(object_def, object_hidden_key, object_hidden_val);
             }
             
@@ -213,48 +235,85 @@ void change_tile(Map& map, SokoPosition position, uint16_t new_id) {
 }
 
 SokoObject* create_object(Map& map, const std::string& name, SokoObjectClass type, SokoPosition position) {
-    map.objects.emplace_back();
-    SokoObject& obj = map.objects.back();
+    SokoObject* obj = new SokoObject();
     
     switch(type) {
     case SokoObjectClass::BARRIER:
-        obj.type = SokoObjectClass::BARRIER;
-        obj.behaviour = SokoObjectBehaviour::STATIC;
-        obj.hidden = true;
-        obj.position = position;
-        obj.sprite.region = Rect{56, 75, 22, 29};
-        obj.sprite.offset.y = 6;
+        obj->type = SokoObjectClass::BARRIER;
+        obj->behaviour = SokoObjectBehaviour::STATIC;
+        obj->hidden = true;
+        obj->position = position;
+        obj->sprite.offset.y = 6;
         break;
     case SokoObjectClass::WOODEN_CRATE:
-        obj.type = SokoObjectClass::WOODEN_CRATE;
-        obj.behaviour = SokoObjectBehaviour::CRATE;
-        obj.position = position;
-        obj.sprite.region = Rect{22, 84, 22, 29};
-        obj.sprite.offset.y = 6;
+        obj->type = SokoObjectClass::WOODEN_CRATE;
+        obj->behaviour = SokoObjectBehaviour::CRATE;
+        obj->position = position;
+        obj->sprite.offset.y = 6;
+        break;
+    case SokoObjectClass::METAL_CRATE:
+        obj->type = SokoObjectClass::METAL_CRATE;
+        obj->behaviour = SokoObjectBehaviour::CRATE;
+        obj->position = position;
+        obj->sprite.offset.y = 6;
+        break;
+    case SokoObjectClass::PILLOW:
+        obj->type = SokoObjectClass::PILLOW;
+        obj->behaviour = SokoObjectBehaviour::CRATE;
+        obj->position = position;
+        obj->sprite.offset.y = 6;
         break;
     case SokoObjectClass::ROSS:
-        obj.type = SokoObjectClass::ROSS;
-        obj.behaviour = SokoObjectBehaviour::PLAYER;
-        obj.position = position;
-        obj.sprite.region = Rect{0, 0, 32, 42};
+        obj->type = SokoObjectClass::ROSS;
+        obj->behaviour = SokoObjectBehaviour::PLAYER;
+        obj->position = position;
         break;
     case SokoObjectClass::MIRAGE:
-        obj.type = SokoObjectClass::MIRAGE;
-        obj.behaviour = SokoObjectBehaviour::NPC_FOLLOW;
-        obj.position = position;
-        obj.sprite.region = Rect{0, 42, 32, 42};
+        obj->type = SokoObjectClass::MIRAGE;
+        obj->behaviour = SokoObjectBehaviour::NPC_FOLLOW;
+        obj->position = position;
         break;
     }
 
-    obj.name = name;
-    return &map.objects.back();
+    if(obj != nullptr) {
+        obj->name = name;
+        map.objects.push_back(obj);
+    }
+
+    return obj;
+}
+
+// Temporarily hardcoded. Switch to using serialized data.
+void set_default_object_sprite(SokoObject* obj, Atlas& atlas) {
+    if(obj == nullptr) { return; }
+    
+    switch(obj->type) {
+    case SokoObjectClass::BARRIER:
+        atlas.set_region(obj->sprite, "barrier");
+        break;
+    case SokoObjectClass::WOODEN_CRATE:
+        atlas.set_region(obj->sprite, "crate_wood_s0");
+        break;
+    case SokoObjectClass::METAL_CRATE:
+        atlas.set_region(obj->sprite, "crate_stone_s0");
+        break;
+    case SokoObjectClass::PILLOW:
+        atlas.set_region(obj->sprite, "crate_pillow_s0");
+        break;
+    case SokoObjectClass::ROSS:
+        atlas.set_region(obj->sprite, "ross_b_idle_s0");
+        break;
+    case SokoObjectClass::MIRAGE:
+        atlas.set_region(obj->sprite, "mirage_idle_s0");
+        break;
+    }
 }
 
 SokoObject* object_at(ObjectList& objects, SokoPosition position) {
     for(int i = 0; i < objects.size(); i++) {
-        if(objects[i].position.x == position.x &&
-           objects[i].position.y == position.y) {
-            return &objects[i];
+        if(objects[i]->position.x == position.x &&
+           objects[i]->position.y == position.y) {
+            return objects[i];
         }
     }
     return nullptr;
@@ -301,8 +360,6 @@ bool attempt_movement(ObjectList& objects, SokoObject* actor, SokoPosition desti
         if(obstacle != nullptr) {
             if(obstacle->behaviour == SokoObjectBehaviour::GOAL) {
                 actor->position = destination;
-                target->direction = actor->direction;
-                target->state = SokoObjectState::IN_TRANSIT;
                 target->position = box_target;
                 return true;
             }
@@ -313,7 +370,7 @@ bool attempt_movement(ObjectList& objects, SokoObject* actor, SokoPosition desti
         }
     }
     
-    return false;   
+    return false;
 }
 
 std::string save_file_prompt() {

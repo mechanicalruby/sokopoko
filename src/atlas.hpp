@@ -32,11 +32,12 @@ struct Atlas {
 
     void set_region(Sprite& sprite, const std::string& key) {
         if(get_region(key) != nullptr) {
+            // if(sprite.texture != textures[get_region(key)->tex_id]) { //set  }    
             sprite.region = get_region(key)->rect;
         }
     }
 };
 
-bool load_atlas(Atlas& at, const std::string& file_path);
+bool load_atlas(Atlas& at, const std::string& file);
 }
 #endif

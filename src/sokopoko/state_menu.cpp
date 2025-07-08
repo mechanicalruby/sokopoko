@@ -26,9 +26,9 @@ void MenuState::init() {
     b2.initialize();
     b3.initialize();
     
-    Turbine::load_texture(map_texture,    "./res/sprite/map.png",     TB_NEAREST, TB_NEAREST, false);
-    Turbine::load_texture(object_texture, "./res/sprite/atlas0.png", TB_NEAREST, TB_NEAREST, false); // AUTOLOAD.
-    Turbine::load_texture(texture,        "./res/sprite/ui.png",      TB_NEAREST, TB_NEAREST, false);
+    Turbine::load_texture(map_texture,    "./res/sprite/map.png",     TB_NEAREST, TB_NEAREST, TB_DISCARD_RAW_TEXTURE_DATA);
+    Turbine::load_texture(object_texture, "./res/sprite/atlas0.png",  TB_NEAREST, TB_NEAREST, TB_DISCARD_RAW_TEXTURE_DATA); // AUTOLOAD.
+    Turbine::load_texture(texture,        "./res/sprite/ui.png",      TB_NEAREST, TB_NEAREST, TB_DISCARD_RAW_TEXTURE_DATA);
     b1.texture = &map_texture;
     b2.texture = &object_texture;
     b3.texture = &texture;
@@ -40,17 +40,20 @@ void MenuState::init() {
     shadow_sprite.centered = true;
     atlas.set_region(shadow_sprite, "shadow_md");
 
-    cam.origin.x   = 400.0f / 2.0f;
+    atlas.set_region(object_preview_sprite, "barrier");
+
+    cam.origin.x   = 320.0f / 2.0f;
     cam.origin.y   = 240.0f / 2.0f;
 
     sky.initialize(&texture);
     load_map(map, "./res/level/mother.json");
+    for (SokoObject* object : map.objects) { set_default_object_sprite(object, atlas); } // temporary
     c_actor = map.c_actors[0];
 }
 
 void MenuState::update(double delta_time, Turbine::InputState& input) {
-    mouse_x = input.mouse_x / 3; // scale
-    mouse_y = input.mouse_y / 3;
+    mouse_x = input.mouse_x / 4; // scale
+    mouse_y = input.mouse_y / 4;
 
     cam.position = Vector2((map.width * 24.0f - 24.0f) / 2.0f, (map.height * 24.0f - 24.0f) / 2.0f);
 
@@ -58,13 +61,13 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_RIGHT)) {
             c_actor->direction = SokoDirection::EAST;
             c_actor->sprite.flip_h = false;
-            atlas.set_region(c_actor->sprite, "ross_lost_idle_e0");
+            atlas.set_region(c_actor->sprite, "ross_b_idle_e0");
             move_player();
         }
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_LEFT)) {
             c_actor->direction = SokoDirection::WEST;
             c_actor->sprite.flip_h = true;
-            atlas.set_region(c_actor->sprite, "ross_lost_idle_e0");
+            atlas.set_region(c_actor->sprite, "ross_b_idle_e0");
             move_player();
         }
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_UP)) {
@@ -74,14 +77,18 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
         }
         if(Turbine::just_pressed(input, Turbine::InputAction::MOVE_DOWN)) {
             c_actor->direction = SokoDirection::SOUTH;
-            atlas.set_region(c_actor->sprite, "ross_lost_idle_s0");
+            atlas.set_region(c_actor->sprite, "ross_b_idle_s0");
             move_player();
         }
     }
 
+    if (Turbine::just_pressed(input, Turbine::InputAction::EDITOR_PLACE_TILE)) {
+        change_tile(map, {0, 2}, 3);
+    }
+
     for(auto& object : map.objects) {
-        object->sprite.position.x = std::lerp(object->sprite.position.x, object->position.x * 24, 25 * delta_time);
-        object->sprite.position.y = std::lerp(object->sprite.position.y, (object->position.y * 24) - 12, 25 * delta_time);
+        object->sprite.position.x = std::lerp(object->sprite.position.x, object->position.x * 24, 35 * delta_time);
+        object->sprite.position.y = std::lerp(object->sprite.position.y, (object->position.y * 24) - 12, 35 * delta_time);
     }
     
     // Update sprite list
@@ -121,7 +128,6 @@ void MenuState::draw(Turbine::Window& window, Turbine::Shader& base_shader) {
     draw_map(map, b1);
 
     b2.begin();
-    // Shadow pass
     for (SokoObject* object : map.objects) {
         if(object->hidden) {
             if(map.show_hidden_objects) {
@@ -135,14 +141,15 @@ void MenuState::draw(Turbine::Window& window, Turbine::Shader& base_shader) {
         
         shadow_sprite.position = object->sprite.position;
         b2.queue(shadow_sprite);
-    }    
-    // Sprite pass
+    }
     for(Turbine::Sprite* sprite : sprite_list) {        
         b2.queue(*sprite);
     }
+    // b2.queue(object_preview_sprite);
     b2.end();
-    
+
     Turbine::reset_camera(cam, base_shader);
-    Sokoban::imgui_map_inspect(map, c_actor, sky);
+    Sokoban::imgui_map_inspect(map, c_actor, sky, atlas);
+    Sokoban::imgui_tile_inspect(map, map_texture);
 }
 }

@@ -1,12 +1,13 @@
 #include "soko_imgui.hpp"
 
 namespace Sokoban {
-void imgui_map_inspect(Map& map, SokoObject*& c_actor, Sky& sky) {
+void imgui_map_inspect(Map& map, SokoObject*& c_actor, Sky& sky, Turbine::Atlas& atlas) {
     ImGui::Begin("Map");
 
     if(ImGui::Button("Load map")) {
         if(load_map(map, load_file_prompt())) {
             c_actor = map.c_actors[0];
+            for (SokoObject* object : map.objects) { set_default_object_sprite(object, atlas); } // temporary
         }
     }
     ImGui::SameLine();
@@ -61,7 +62,7 @@ void imgui_map_inspect(Map& map, SokoObject*& c_actor, Sky& sky) {
     ImGui::PushItemWidth(-1);
     if (ImGui::BeginListBox("##objectlist")) {
         for (int i = 0; i < map.objects.size(); i++) {
-            SokoObject* object = &map.objects[i];
+            SokoObject* object = map.objects[i];
             
             if (object->hidden && !map.show_hidden_objects)
                 continue;
@@ -89,7 +90,7 @@ void imgui_map_inspect(Map& map, SokoObject*& c_actor, Sky& sky) {
     {
         SokoObject* object = nullptr;
         try {
-            object = &map.objects.at(selection);
+            object = map.objects.at(selection);
         } catch (const std::out_of_range& e) {
             // std::cout << "Exception: " << e.what() << std::endl;
         }
@@ -148,10 +149,6 @@ void imgui_map_inspect(Map& map, SokoObject*& c_actor, Sky& sky) {
     }
 
     ImGui::End();
-
-    ImGui::Begin("Palette");
-    
-    ImGui::End();
     
     if(map.width <= 0)
         map.width = 1;
@@ -160,7 +157,66 @@ void imgui_map_inspect(Map& map, SokoObject*& c_actor, Sky& sky) {
         map.height = 1;
 }
 
-void imgui_tile_inspect(Map& map) {
-    
+void imgui_tile_inspect(Map& map, Texture& texture) {
+    constexpr int TILE_SIZE = 24;
+
+    ImGui::Begin("Tiles");
+
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImVec2 canvas_pos = ImGui::GetCursorScreenPos(); // top-left corner
+    ImVec2 canvas_size = ImGui::GetContentRegionAvail();
+    ImVec2 canvas_limit = ImVec2(canvas_pos.x + canvas_size.x, canvas_pos.y + canvas_size.y);
+
+    draw_list->AddRectFilled(canvas_pos, canvas_limit, IM_COL32(30, 30, 30, 255));
+    draw_list->AddRect(canvas_pos, canvas_limit, IM_COL32(17, 17, 17, 255));
+    draw_list->PushClipRect(canvas_pos, canvas_limit, true);
+
+    // calculate number of usable tiles
+    int usable_columns = texture.width / TILE_SIZE;
+    int usable_rows    = texture.height / TILE_SIZE;
+
+    int used_tex_width  = usable_columns * TILE_SIZE;
+    int used_tex_height = usable_rows * TILE_SIZE;
+
+    // snap UVs to usable tile area
+    ImVec2 uv0 = ImVec2(0.0f, 0.0f);
+    ImVec2 uv1 = ImVec2(
+        static_cast<float>(used_tex_width)  / texture.width,
+        static_cast<float>(used_tex_height) / texture.height
+    );
+
+    ImVec2 image_end = ImVec2((float)used_tex_width + canvas_pos.x, (float)used_tex_height + canvas_pos.y);
+
+    draw_list->AddImage(
+        texture.id,
+        canvas_pos,
+        image_end,
+        uv0,
+        uv1,
+        IM_COL32(255, 255, 255, 255)
+    );
+
+    // image borders
+    draw_list->AddRect(canvas_pos, image_end, IM_COL32(255, 0, 0, 120));
+
+    // tile highlight
+    ImVec2 mouse_pos = ImGui::GetIO().MousePos;
+    if (mouse_pos.x >= canvas_pos.x && mouse_pos.y >= canvas_pos.y &&
+        mouse_pos.x < image_end.x  && mouse_pos.y < image_end.y) {
+
+        ImVec2 local = ImVec2(mouse_pos.x - canvas_pos.x, mouse_pos.y - canvas_pos.y);
+        int tile_x = (int)(local.x) / TILE_SIZE;
+        int tile_y = (int)(local.y) / TILE_SIZE;
+
+        // clamp to usable tile area
+        if (tile_x < usable_columns && tile_y < usable_rows) {
+            ImVec2 tile_min = ImVec2(tile_x * TILE_SIZE + canvas_pos.x, tile_y * TILE_SIZE + canvas_pos.y);
+            ImVec2 tile_max = ImVec2(TILE_SIZE + tile_min.x, TILE_SIZE + tile_min.y);
+            draw_list->AddRect(tile_min, tile_max, IM_COL32(255, 255, 0, 200), 0.0f, 0, 1.0f);
+        }
+    }
+
+    draw_list->PopClipRect();
+    ImGui::End();
 }
 }

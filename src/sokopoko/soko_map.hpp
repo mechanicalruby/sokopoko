@@ -2,6 +2,7 @@
 #define SOKOBAN_MAP
 
 #include "../sprite.hpp"
+#include "../atlas.hpp"
 #include "soko.hpp"
 
 #include <iostream>
@@ -25,6 +26,7 @@ struct Map {
     
     std::vector<uint16_t> tiles;
     std::vector<Tileset> tilemaps;
+    std::vector<SokoRegion> cam_regions;
     Turbine::Sprite tile_sprite;
 
     ObjectList objects;
@@ -45,18 +47,13 @@ struct CameraTarget {
     float x, y;
 };
 
-struct Scene {
-    std::string name;
-    Map map;
-    CameraTarget camera_target;
-};
-
 bool load_map(Map& map, const std::string& file_path);
 bool save_map(Map& map, const std::string& file_path);
 void draw_map(Map& map, Turbine::Batch& batch);
 
 void change_tile(Map& map, SokoPosition position, uint16_t new_id);
 SokoObject* create_object(Map& map, const std::string& name, SokoObjectClass type, SokoPosition position);
+void set_default_object_sprite(SokoObject* obj, Atlas& atlas);
 
 SokoObject* object_at(ObjectList& objects, SokoPosition position);
 bool attempt_movement(ObjectList& objects, SokoObject* actor, SokoPosition destination);

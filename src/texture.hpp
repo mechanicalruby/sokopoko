@@ -9,6 +9,8 @@
 
 #define TB_NEAREST GL_NEAREST
 #define TB_LINEAR  GL_LINEAR
+#define TB_KEEP_RAW_TEXTURE_DATA 1
+#define TB_DISCARD_RAW_TEXTURE_DATA 0
 
 namespace Turbine {
 struct Texture {
@@ -20,7 +22,7 @@ struct Texture {
     uint32_t wrap_s, wrap_t;
 };
 
-bool load_texture(Texture& tex, const std::string& file_path, uint32_t filter_mag, uint32_t filter_min, bool keep_data);
+bool load_texture(Texture& tex, const std::string& file_path, uint32_t filter_mag, uint32_t filter_min, bool keep_data = TB_DISCARD_RAW_TEXTURE_DATA);
 void bind_texture(Texture& tex);
 void unbind_texture(void);
 

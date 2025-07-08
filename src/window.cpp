@@ -55,7 +55,7 @@ void set_blend_mode(Window& window) {
 bool set_window_icon(Window& window, const std::string& file_path) {
     Turbine::Texture icon;
     
-    if(!Turbine::load_texture(icon, file_path, TB_NEAREST, TB_NEAREST, true)) {
+    if(!Turbine::load_texture(icon, file_path, TB_NEAREST, TB_NEAREST, TB_KEEP_RAW_TEXTURE_DATA)) {
         return false;
     }
     

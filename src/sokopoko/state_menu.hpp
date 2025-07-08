@@ -27,11 +27,12 @@ private:
     Turbine::Texture map_texture;
 
     Turbine::Sprite shadow_sprite {};
+    Turbine::Sprite object_preview_sprite {};
+
+    Turbine::Atlas atlas;
     
     Turbine::Shader f_shad {};
     Turbine::Camera cam {};
-
-    Turbine::Atlas atlas {};
 
     Sokoban::Sky sky {};
     Sokoban::SokoObject* c_actor = nullptr; // controlled actor

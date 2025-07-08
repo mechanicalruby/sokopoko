@@ -32,7 +32,7 @@
 #include <vector>
 
 int main(int argc, char *argv[]) {
-    constexpr unsigned int INTERNAL_SCREEN_WIDTH  = 400;
+    constexpr unsigned int INTERNAL_SCREEN_WIDTH  = 320;
     constexpr unsigned int INTERNAL_SCREEN_HEIGHT = 240;
     unsigned int WINDOW_SCALE = 3;
     
