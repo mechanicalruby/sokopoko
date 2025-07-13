@@ -79,12 +79,9 @@ if(WIN32 OR UNIX)
     ${TRACY_SRC}
   )
 
-  target_compile_definitions(${PROJECT_NAME}
-    PRIVATE
+  target_compile_definitions(${PROJECT_NAME} PRIVATE
     TB_GRAPHICS_GLES2=${OPTION_IS_GLES2}
     TB_GRAPHICS_LEGACY=${OPTION_IS_LEGACY}
-    
-    PUBLIC
     $<$<CONFIG:Release>:TRACY_ENABLE>
   )
 
