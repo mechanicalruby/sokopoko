@@ -27,6 +27,11 @@ if(WIN32 OR UNIX)
 
   # NFD
   add_subdirectory("ext/nativefiledialog-extended")
+
+  # Tracy profiler
+  option(TRACY_ENABLE " " ON)
+  option(TRACY_ON_DEMAND " " ON)
+  add_subdirectory("ext/tracy")
 endif()
 
 file(GLOB COMMON_SRC
@@ -45,6 +50,10 @@ file(GLOB IMGUI_SRC
 
   # Custom
   "src/imgui/*.cpp"
+)
+
+file(GLOB TRACY_SRC
+  "ext/tracy/public/TracyClient.cpp"
 )
 
 if(WIN32 OR UNIX)
@@ -67,11 +76,16 @@ if(WIN32 OR UNIX)
     ${COMMON_SRC}
     ${IMGUI_SRC}
     ${SOKOPOKO_SRC}
+    ${TRACY_SRC}
   )
 
-  target_compile_definitions(${PROJECT_NAME} PRIVATE
+  target_compile_definitions(${PROJECT_NAME}
+    PRIVATE
     TB_GRAPHICS_GLES2=${OPTION_IS_GLES2}
     TB_GRAPHICS_LEGACY=${OPTION_IS_LEGACY}
+    
+    PUBLIC
+    $<$<CONFIG:Release>:TRACY_ENABLE>
   )
 
   target_link_libraries(${PROJECT_NAME}
@@ -79,6 +93,7 @@ if(WIN32 OR UNIX)
     glm::glm
     glfw
     nfd
+    Tracy::TracyClient
   )
 endif()
 
