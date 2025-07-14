@@ -37,6 +37,13 @@ struct PositionTrack : public Track {
     }
 };
 
+struct ScaleTrack: public Track {
+    std::vector<TKey<Vector2>> scales;
+    ScaleTrack() {
+        type = TrackType::SCALE;
+    }
+};
+
 struct RegionTrack : public Track {
     std::vector<TKey<Rect>> regions;
     RegionTrack() {
@@ -58,6 +65,7 @@ Track* get_track(Animation& anim, int p_track);
 void set_track_target(Animation& anim, int p_track, const std::string& property_path);
 
 int position_track_insert_key(Animation& anim, int p_track, double p_time, const Vector2& position);
+int scale_track_insert_key(Animation& anim, int p_track, double p_time, const Vector2& scale);
 int region_track_insert_key(Animation& anim, int p_track, double p_time, const Rect& region);
 
 /* templates with their definitions here. c++! */

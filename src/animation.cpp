@@ -89,6 +89,22 @@ int position_track_insert_key(Animation& anim, int p_track, double p_time, const
     return 0;
 }
 
+int scale_track_insert_key(Animation& anim, int p_track, double p_time, const Vector2& scale) {
+    if (p_track < 0 || p_track >= anim.tracks.size()) {
+        return -1;
+    }
+
+    if (anim.tracks[p_track]->type != TrackType::SCALE) {
+        return -1;
+    }
+
+    ScaleTrack* pt = static_cast<ScaleTrack*>(anim.tracks[p_track]);
+    pt->scales.push_back(TKey<Vector2>{p_time, scale});
+
+    sort_track(anim, p_track);
+    return 0;
+}
+
 int region_track_insert_key(Animation& anim, int p_track, double p_time, const Rect& region) {
     if(p_track < 0 || p_track >= anim.tracks.size()) {
         return -1;
