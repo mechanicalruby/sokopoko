@@ -174,13 +174,28 @@ void use_shader(Shader& shader) {
 
 // uniforms
 
-void uniform_mat4(Shader& shader, const char* name, const glm::mat4& value) {
-    GLuint uniform = glGetUniformLocation(shader.id, name);
-    glUniformMatrix4fv(uniform, 1, GL_FALSE, glm::value_ptr(value));
+GLuint get_uniform_location(Shader & shader, const char* name) {
+    auto it = shader.uniforms.find(name);
+    if (it != shader.uniforms.end()) {
+        return it->second;
+    }
+
+    GLuint location = glGetUniformLocation(shader.id, name);
+    shader.uniforms[name] = location;
+    return location;
 }
-  
+
+void uniform_mat4(Shader& shader, const char* name, const glm::mat4& value) {
+    GLuint uniform = get_uniform_location(shader, name);
+    if (uniform != GL_INVALID_INDEX) {
+        glUniformMatrix4fv(uniform, 1, GL_FALSE, glm::value_ptr(value));
+    }
+}
+
 void uniform_float(Shader& shader, const char* name, float value) {
-    GLuint uniform = glGetUniformLocation(shader.id, name);
-    glUniform1f(uniform, value);
+    GLuint uniform = get_uniform_location(shader, name);
+    if (uniform != GL_INVALID_INDEX) {
+        glUniform1f(uniform, value);
+    }
 }
 }
