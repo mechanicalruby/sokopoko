@@ -5,3 +5,4 @@ res/
 linux-build/
 psp-build/
 .dir-locals.el
+CMakeSettings.json

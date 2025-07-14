@@ -1,4 +1,5 @@
 #include "sprite.hpp"
+#include <tracy/Tracy.hpp>
 
 namespace Turbine {
 
@@ -134,10 +135,13 @@ void Batch::queue(Sprite& sprite) {
 }
 
 void Batch::begin(void) {
+    ZoneScoped;
     index_offset = 0;
 }
 
 void Batch::end(void) {
+    ZoneScoped;
+
     if(!is_initialized) {
         printf("SPRITEBATCH: Was not initialized!!\n");
         return;

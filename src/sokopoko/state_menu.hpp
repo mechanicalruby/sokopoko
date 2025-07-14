@@ -8,6 +8,7 @@
 #include "../render_list.hpp"
 #include "../camera.hpp"
 #include "../animation.hpp"
+#include "../animation_player.hpp"
 #include "../atlas.hpp"
 #include "../imgui/inspector.hpp"
 
@@ -34,9 +35,11 @@ private:
     Turbine::Shader f_shad {};
     Turbine::Camera cam {};
 
+    Turbine::Animation example_animation {};
     Sokoban::Sky sky {};
     Sokoban::SokoObject* c_actor = nullptr; // controlled actor
     std::vector<Turbine::Sprite*> sprite_list;
+    std::vector<AnimationInstance> animation_list;
     Map map;
 
     double mouse_x, mouse_y;

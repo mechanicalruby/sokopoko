@@ -20,6 +20,15 @@ struct Tileset {
     size_t starting_index;
 };
 
+struct Prop {
+    std::string name;
+    Turbine::Sprite sprite;
+};
+
+struct CameraTarget {
+    float x, y;
+};
+
 struct Map {
     std::string name;
     int width, height;
@@ -27,6 +36,7 @@ struct Map {
     std::vector<uint16_t> tiles;
     std::vector<Tileset> tilemaps;
     std::vector<SokoRegion> cam_regions;
+    std::vector<Prop> props;
     Turbine::Sprite tile_sprite;
 
     ObjectList objects;
@@ -36,15 +46,6 @@ struct Map {
 
     bool is_edit_mode = false;
     bool show_hidden_objects = false;
-};
-
-struct Prop {
-    std::string name;
-    Turbine::Sprite sprite;
-};
-
-struct CameraTarget {
-    float x, y;
 };
 
 bool load_map(Map& map, const std::string& file_path);

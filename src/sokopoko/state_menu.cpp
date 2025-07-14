@@ -1,4 +1,5 @@
 #include "state_menu.hpp"
+#include <tracy/Tracy.hpp>
 
 namespace Sokoban {
 MenuState::~MenuState() {
@@ -39,7 +40,7 @@ void MenuState::init() {
     shadow_sprite.offset.y = 16;
     shadow_sprite.centered = true;
     atlas.set_region(shadow_sprite, "shadow_md");
-
+ 
     atlas.set_region(object_preview_sprite, "barrier");
 
     cam.origin.x   = 320.0f / 2.0f;
@@ -48,12 +49,28 @@ void MenuState::init() {
     sky.initialize(&texture);
     load_map(map, "./res/level/mother.json");
     for (SokoObject* object : map.objects) { set_default_object_sprite(object, atlas); } // temporary
+
+    // test prop
+    Prop prop {};
+    prop.name = "bush";
+    prop.sprite.position = Vector2(80.0f, 12.0f);
+    atlas.set_region(prop.sprite, "p_bush_0");
+    map.props.push_back(std::move(prop));
+
+    {
+        int scale_track = Turbine::add_track(example_animation, Turbine::TrackType::SCALE);
+        Turbine::scale_track_insert_key(example_animation, scale_track, 0.0, Vector2(0.0f, 0.0f));
+        Turbine::scale_track_insert_key(example_animation, scale_track, 1.0, Vector2(0.0f, 0.0f));
+
+    }
+
     c_actor = map.c_actors[0];
 }
 
 void MenuState::update(double delta_time, Turbine::InputState& input) {
-    mouse_x = input.mouse_x / 4; // scale
-    mouse_y = input.mouse_y / 4;
+    ZoneScopedNC("Game update", 0xFF0000);
+    mouse_x = input.mouse_x / 3; // scale
+    mouse_y = input.mouse_y / 3;
 
     cam.position = Vector2((map.width * 24.0f - 24.0f) / 2.0f, (map.height * 24.0f - 24.0f) / 2.0f);
 
@@ -83,12 +100,13 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
     }
 
     if (Turbine::just_pressed(input, Turbine::InputAction::EDITOR_PLACE_TILE)) {
-        change_tile(map, {0, 2}, 3);
+        // SokoObject* object = create_object(map, "new_object", SokoObjectClass::BARRIER, {static_cast<int>(mouse_x / 24), static_cast<int>(mouse_y / 24)});
+        // set_default_object_sprite(object, atlas);
     }
 
     for(auto& object : map.objects) {
-        object->sprite.position.x = std::lerp(object->sprite.position.x, object->position.x * 24, 35 * delta_time);
-        object->sprite.position.y = std::lerp(object->sprite.position.y, (object->position.y * 24) - 12, 35 * delta_time);
+        object->sprite.position.x = object->position.x * 24;
+        object->sprite.position.y = (object->position.y * 24) - 12;
     }
     
     // Update sprite list
@@ -109,6 +127,15 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
         sprite_list.push_back(&object->sprite);
     }
 
+    // add props to sprite list
+    for (Prop& prop : map.props) {
+        sprite_list.push_back(&prop.sprite);
+    }
+
+    // editor: update preview for placed object
+    object_preview_sprite.offset = Vector2(0, -6);
+    object_preview_sprite.position = Vector2(static_cast<int>(mouse_x / 24) * 24, static_cast<int>(mouse_y / 24) * 24);
+
     std::sort(sprite_list.begin(), sprite_list.end(), [](const Sprite* a, const Sprite* b) {
         return a->position.y < b->position.y;
     });
@@ -118,6 +145,7 @@ void MenuState::update(double delta_time, Turbine::InputState& input) {
 }
 
 void MenuState::draw(Turbine::Window& window, Turbine::Shader& base_shader) {
+    ZoneScopedNC("Game draw", 0xFFFF00);
     Turbine::clear(window, 0.0f, 0.0f, 0.0f);
     Turbine::set_blend_mode(window);
 
@@ -149,7 +177,12 @@ void MenuState::draw(Turbine::Window& window, Turbine::Shader& base_shader) {
     b2.end();
 
     Turbine::reset_camera(cam, base_shader);
-    Sokoban::imgui_map_inspect(map, c_actor, sky, atlas);
-    Sokoban::imgui_tile_inspect(map, map_texture);
+    
+    b3.begin();
+    Turbine::queue_bitmap_string(b3, "Object mode", 0, 0);
+    b3.end();
+
+    // Sokoban::imgui_map_inspect(map, c_actor, sky, atlas);
+    // Sokoban::imgui_tile_inspect(map, map_texture);
 }
 }

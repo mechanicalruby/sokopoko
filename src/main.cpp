@@ -28,6 +28,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include <tracy/Tracy.hpp>
+
 #include <cinttypes>
 #include <vector>
 
@@ -47,7 +49,7 @@ int main(int argc, char *argv[]) {
     if(!Turbine::set_window_icon(window, "./res/icon.png")) {
         printf("WINDOW: Couldn't set window icon.\n");
     }
-
+    
 #if !TB_GRAPHICS_LEGACY
     Turbine::Shader shader {};
 #if TB_GRAPHICS_GLES2
@@ -96,13 +98,14 @@ int main(int argc, char *argv[]) {
     double gTime = 0.0f;
     double dt = 0.0f;
     while (!Turbine::should_close_window(window)) {
+        FrameMarkStart("Turbine frame"); // Tracy debug frame define
         Turbine::poll_window(window);
         calculate_delta_time(dt);
     	gTime += dt;
 	
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+        // ImGui_ImplOpenGL3_NewFrame();
+        // ImGui_ImplGlfw_NewFrame();
+        // ImGui::NewFrame();
         
         sm.update(dt, input);
         
@@ -117,7 +120,7 @@ int main(int argc, char *argv[]) {
         Turbine::use_shader(shader);
 #endif
         Turbine::clear(window, 0.0f, 0.0f, 0.0f);
-
+        
         sm.draw(window, shader);
         Turbine::unbind_framebuffer();
 
@@ -125,9 +128,11 @@ int main(int argc, char *argv[]) {
         int fwidth, fheight;
         glfwGetFramebufferSize(window.ptr, &fwidth, &fheight);
         Turbine::set_viewport(0, 0, fwidth, fheight);
+#if !TB_GRAPHICS_LEGACY
         Turbine::uniform_mat4(shader, "projection", glm::ortho(0.0f, (float)fwidth,
                                                                (float)fheight, 0.0f, 1.0f, -1.0f));
         Turbine::uniform_float(shader, "uTime", static_cast<float>(gTime));
+#endif
         Turbine::clear(window, 0.0f, 0.0f, 0.0f);
        
         // render quad to screen
@@ -135,11 +140,12 @@ int main(int argc, char *argv[]) {
         screen_batch.queue(render_target);
         screen_batch.end();
 
-        ImGui::Render();
-        ImGui::EndFrame();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
+        // ImGui::Render();
+        // ImGui::EndFrame();
+        // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        
         Turbine::swap_buffers(window);
+        FrameMarkEnd("Turbine frame");
     }
 
     ImGui_ImplOpenGL3_Shutdown();

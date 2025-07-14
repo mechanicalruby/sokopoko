@@ -1,7 +1,9 @@
 #include "soko_map.hpp"
+#include <tracy/Tracy.hpp>
 
 namespace Sokoban {
 bool load_map(Map& map, const std::string& file_path) {
+    ZoneScopedN("Load map");
     yyjson_read_err err;
     yyjson_doc* doc = yyjson_read_file(file_path.c_str(), 0, NULL, &err);
     if(doc == NULL || err.pos != 0) {
@@ -24,6 +26,10 @@ bool load_map(Map& map, const std::string& file_path) {
 	    delete object;
         }
         map.objects.clear();
+    }
+
+    if(!map.props.empty()) {
+        map.props.clear();
     }
 
     yyjson_val* name_val = yyjson_obj_get(root, "name");

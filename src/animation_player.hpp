@@ -36,6 +36,8 @@ struct AnimationInstance {
     }
 };
 
-// unordered_map binds..
+typedef std::vector<AnimationInstance> AnimationQueue;
+
+void apply_queue(AnimationQueue& queue);
 }
 #endif
