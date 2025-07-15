@@ -168,13 +168,20 @@ void compile_default_shader(Shader& shader) {
     // compile_shader(shader, vertex_shader, fragment_shader);
 }
 
+void precache_default_uniforms(Shader& shader) {
+    get_uniform_location(shader, "projection");
+    get_uniform_location(shader, "view");
+    get_uniform_location(shader, "model");
+    get_uniform_location(shader, "uTime");
+}
+
 void use_shader(Shader& shader) {
     glUseProgram(shader.id);
 }
 
 // uniforms
 
-GLuint get_uniform_location(Shader & shader, const char* name) {
+GLuint get_uniform_location(Shader& shader, const char* name) {
     auto it = shader.uniforms.find(name);
     if (it != shader.uniforms.end()) {
         return it->second;

@@ -58,6 +58,7 @@ int main(int argc, char *argv[]) {
     Turbine::load_shader_from_file(shader, "./res/shaders/std.vert", "./res/shaders/std.frag");
 #endif
     Turbine::use_shader(shader);
+    Turbine::precache_default_uniforms(shader);
     Turbine::uniform_mat4(shader, "projection", glm::ortho(0.0f, (float)INTERNAL_SCREEN_WIDTH,
                                                            (float)INTERNAL_SCREEN_HEIGHT, 0.0f, 1.0f, -1.0f));
     Turbine::uniform_mat4(shader, "view", glm::mat4(1.0f));

@@ -29,6 +29,7 @@ void use_shader(Shader& shader);
 
 bool load_shader_from_file(Shader& shader, const std::string& vert_path, const std::string& frag_path);
 void compile_default_shader(Shader& shader);
+void precache_default_uniforms(Shader& shader);
 
 GLuint get_uniform_location(Shader& shader, const char* name);
 void uniform_mat4(Shader& shader, const char* name, const glm::mat4& value);
