@@ -25,10 +25,94 @@ struct Vertex {
 struct Rect {
     float x, y;
     float width, height;
+
+    Rect& operator+=(const Rect& b) {
+        x += b.x;
+        y += b.y;
+        width += b.width;
+        height += b.height;
+        return *this;
+    }
+
+    Rect& operator-=(const Rect& b) {
+        x -= b.x;
+        y -= b.y;
+        width -= b.width;
+        height -= b.height;
+        return *this;
+    }
+
+    Rect& operator+(const Rect& b) {
+        x += b.x;
+        y += b.y;
+        width += b.width;
+        height += b.height;
+        return *this;
+    }
+
+    Rect& operator-(const Rect& b) {
+        x -= b.x;
+        y -= b.y;
+        width -= b.width;
+        height -= b.height;
+        return *this;
+    }
+
+    Rect& operator*(const Rect& b) {
+        x *= b.x;
+        y *= b.y;
+        width *= b.width;
+        height *= b.height;
+        return *this;
+    }
+
+    Rect& operator/(const Rect& b) {
+        x /= b.x;
+        y /= b.y;
+        width /= b.width;
+        height /= b.height;
+        return *this;
+    }
 };
 
 struct Vector2 {
     float x, y;
+
+    Vector2& operator+=(const Vector2& b) {
+        x += b.x;
+        y += b.y;
+        return *this;
+    }
+
+    Vector2& operator-=(const Vector2& b) {
+        x -= b.x;
+        y -= b.y;
+        return *this;
+    }
+
+    Vector2& operator+(const Vector2& b) {
+        x += b.x;
+        y += b.y;
+        return *this;
+    }
+
+    Vector2& operator-(const Vector2& b) {
+        x -= b.x;
+        y -= b.y;
+        return *this;
+    }
+
+    Vector2& operator*(const Vector2& b) {
+        x *= b.x;
+        y *= b.y;
+        return *this;
+    }
+
+    Vector2& operator/(const Vector2& b) {
+        x /= b.x;
+        y /= b.y;
+        return *this;
+    }
 };
 
 union Color {
