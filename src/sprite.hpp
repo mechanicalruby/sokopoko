@@ -78,40 +78,20 @@ struct Rect {
 struct Vector2 {
     float x, y;
 
-    Vector2& operator+=(const Vector2& b) {
-        x += b.x;
-        y += b.y;
-        return *this;
+    Vector2 operator+(const Vector2& other) const {
+        return Vector2(x + other.x, y + other.y);
     }
 
-    Vector2& operator-=(const Vector2& b) {
-        x -= b.x;
-        y -= b.y;
-        return *this;
+    Vector2 operator*(const Vector2& other) const {
+        return Vector2(x * other.x, y * other.y);
     }
 
-    Vector2& operator+(const Vector2& b) {
-        x += b.x;
-        y += b.y;
-        return *this;
+    Vector2 operator*(double scalar) const {
+        return Vector2(x * scalar, y * scalar);
     }
 
-    Vector2& operator-(const Vector2& b) {
-        x -= b.x;
-        y -= b.y;
-        return *this;
-    }
-
-    Vector2& operator*(const Vector2& b) {
-        x *= b.x;
-        y *= b.y;
-        return *this;
-    }
-
-    Vector2& operator/(const Vector2& b) {
-        x /= b.x;
-        y /= b.y;
-        return *this;
+    Vector2 operator/(double scalar) const {
+        return Vector2(x / scalar, y / scalar);
     }
 };
 
