@@ -56,8 +56,10 @@ void change_tile(Map& map, SokoPosition position, uint16_t new_id);
 SokoObject* create_object(Map& map, const std::string& name, SokoObjectClass type, SokoPosition position);
 void set_default_object_sprite(SokoObject* obj, Atlas& atlas);
 
-SokoObject* object_at(ObjectList& objects, SokoPosition position);
-bool attempt_movement(ObjectList& objects, SokoObject* actor, SokoPosition destination);
+SokoObject* object_at(Map& map, SokoPosition position);
+bool attempt_movement(Map& map, SokoObject* actor, SokoPosition destination);
+
+bool check_puzzle_state(Map& map, uint32_t puzzle_id);
 
 // File loading / NFD
 std::string save_file_prompt();

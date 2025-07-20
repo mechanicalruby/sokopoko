@@ -315,21 +315,21 @@ void set_default_object_sprite(SokoObject* obj, Atlas& atlas) {
     }
 }
 
-SokoObject* object_at(ObjectList& objects, SokoPosition position) {
-    for(int i = 0; i < objects.size(); i++) {
-        if(objects[i]->position.x == position.x &&
-           objects[i]->position.y == position.y) {
-            return objects[i];
+SokoObject* object_at(Map& map, SokoPosition position) {
+    for(int i = 0; i < map.objects.size(); i++) {
+        if(map.objects[i]->position.x == position.x &&
+           map.objects[i]->position.y == position.y) {
+            return map.objects[i];
         }
     }
     return nullptr;
 }
 
-bool attempt_movement(ObjectList& objects, SokoObject* actor, SokoPosition destination) {
+bool attempt_movement(Map& map, SokoObject* actor, SokoPosition destination) {
     if(actor == nullptr)
         return false;
     
-    auto target = object_at(objects, destination);
+    auto target = object_at(map, destination);
     
     if(target == nullptr) {
         actor->position = destination;
@@ -361,7 +361,7 @@ bool attempt_movement(ObjectList& objects, SokoObject* actor, SokoPosition desti
             actor->position.y + (movement_vector.y * 2)
         };
 
-        auto obstacle = object_at(objects, box_target);
+        auto obstacle = object_at(map, box_target);
         
         if(obstacle != nullptr) {
             if(obstacle->behaviour == SokoObjectBehaviour::GOAL) {
