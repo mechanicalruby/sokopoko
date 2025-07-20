@@ -207,6 +207,10 @@ bool save_map(Map& map, const std::string& file_path) {
 }
 
 void draw_map(Map& map, Turbine::Batch& batch) {
+    if (batch.texture == nullptr || batch.texture->width == 0) {
+        return;
+    }
+
     batch.begin();
     for(int i = 0; i < map.tiles.size(); i++) {
         uint16_t& tile_id = map.tiles[i];
