@@ -383,6 +383,31 @@ bool attempt_movement(Map& map, SokoObject* actor, SokoPosition destination) {
     return false;
 }
 
+bool check_puzzle_state(Map& map, uint32_t puzzle_id) {
+    bool puzzle_is_solved = true;
+
+    if(map.goals.empty())
+        puzzle_is_solved = false;
+
+    for(Goal& goal : map.goals) {
+        // check for things in goals
+        SokoObject* thing_in_goal = object_at(map, goal.position);
+        if (thing_in_goal != nullptr && thing_in_goal->behaviour == SokoObjectBehaviour::CRATE) {
+            goal.is_satisfied = true;
+        }
+        else {
+            goal.is_satisfied = false;
+        }
+
+        // check all the goals
+        if(goal.id == puzzle_id && goal.is_satisfied == false) {
+            puzzle_is_solved = false;
+        }
+    }
+
+    return puzzle_is_solved;
+}
+
 std::string save_file_prompt() {
     NFD::Guard nfdGuard;
     NFD::UniquePath outPath;

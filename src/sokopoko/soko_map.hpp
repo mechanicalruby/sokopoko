@@ -29,6 +29,12 @@ struct CameraTarget {
     float x, y;
 };
 
+struct Goal {
+    uint32_t id; // for which puzzle in the map?
+    SokoPosition position;
+    bool is_satisfied = false;
+};
+
 struct Map {
     std::string name;
     int width, height;
@@ -37,6 +43,7 @@ struct Map {
     std::vector<Tileset> tilemaps;
     std::vector<SokoRegion> cam_regions;
     std::vector<Prop> props;
+    std::vector<Goal> goals;
     Turbine::Sprite tile_sprite;
 
     ObjectList objects;
