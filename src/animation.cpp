@@ -17,6 +17,11 @@ int add_track(Animation& anim, TrackType type) {
         anim.tracks.push_back(pt);
         break;
     }
+    case TrackType::SCALE: {
+        ScaleTrack* st = new ScaleTrack();
+        anim.tracks.push_back(st);
+        break;
+    }
     case TrackType::REGION: {
         RegionTrack* rt = new RegionTrack();
         anim.tracks.push_back(rt);
@@ -41,6 +46,11 @@ void remove_track(Animation& anim, int p_track) {
     case TrackType::POSITION: {
         PositionTrack* pt = static_cast<PositionTrack*>(t);
         pt->positions.clear();
+        break;
+    }
+    case TrackType::SCALE: {
+        ScaleTrack* st = static_cast<ScaleTrack*>(t);
+        st->scales.clear();
         break;
     }
     case TrackType::REGION: {
@@ -132,6 +142,11 @@ void sort_track(Animation& anim, int p_track) {
     case TrackType::POSITION: {
         PositionTrack* pt = static_cast<PositionTrack*>(t);
         std::sort(pt->positions.begin(), pt->positions.end(), key_ascend_sort_comp<Vector2>);
+        break;
+    }
+    case TrackType::SCALE: {
+        ScaleTrack* st = static_cast<ScaleTrack*>(t);
+        std::sort(st->scales.begin(), st->scales.end(), key_ascend_sort_comp<Vector2>);
         break;
     }
     case TrackType::REGION: {

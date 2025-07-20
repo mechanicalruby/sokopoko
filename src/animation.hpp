@@ -108,6 +108,30 @@ const TKey<T>& get_upper_bound_key(const std::vector<TKey<T>>& keys, double t) {
     return *key_it;
 }
 
+template<typename T>
+const T get_interpolated_value(const std::vector<TKey<T>>& keys, double t) {
+    ZoneScoped;
+    const TKey<T>& lower_key = Turbine::get_lower_bound_key<T>(keys, t);
+    const TKey<T>& upper_key = Turbine::get_upper_bound_key<T>(keys, t);
+
+    // local_lower_key = 0
+    double local_upper_key = upper_key.time - lower_key.time;
+    double local_playhead  = t - lower_key.time;
+
+    // if they're that close, they're probably the same...
+    if (local_upper_key <= 0.000001) {
+        return lower_key.value;
+    }
+
+    double progress = local_playhead / local_upper_key;
+
+    // now actually perform linear interpolation
+    // y0 (x1 - x) + y1 (x - x0) / x1 - x0
+    
+    T final = lower_key.value * (1.0 - progress) + upper_key.value * progress;
+    return final;
+}
+
 void sort_track(Animation& anim, int p_track);
 }
 #endif
