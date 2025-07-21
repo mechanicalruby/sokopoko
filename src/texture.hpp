@@ -27,6 +27,6 @@ void bind_texture(Texture& tex);
 void unbind_texture(void);
 
 // blank texture target
-void generate_texture(Texture& tex, uint32_t width, uint32_t height);
+void generate_texture(Texture& tex, uint32_t width, uint32_t height, const uint8_t* data = NULL);
 }
 #endif

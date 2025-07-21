@@ -39,7 +39,7 @@ bool load_texture(Texture& tex, const std::string& file_path, uint32_t filter_ma
     return true;
 }
 
-void generate_texture(Texture& tex, uint32_t width, uint32_t height) {
+void generate_texture(Texture& tex, uint32_t width, uint32_t height, const uint8_t* data) {
     uint32_t texture;
 
     glGenTextures(1, &texture);
@@ -51,7 +51,7 @@ void generate_texture(Texture& tex, uint32_t width, uint32_t height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);    
     glBindTexture(GL_TEXTURE_2D, 0);
 
     tex.id = texture;
