@@ -1,19 +1,23 @@
 #include "soko_sky.hpp"
 
 namespace Sokoban {
-void Sky::initialize(Texture* texture) {
-    if(texture == nullptr)
-        return;
-    
+void Sky::initialize() {
     batch.initialize();
-    batch.texture = texture;
+
+    // create blank white texture data
+    std::vector<uint8_t> white_array(64 * 64 * 3, 255);
+    Turbine::generate_texture(texture, 64, 64, white_array.data());
+    batch.texture = &texture;
+
     size = {400, 240};
-    uv   = {167, 0, 4, 4};
-    top_color.color = 0x00000000;
-    bottom_color.color = 0x00000000;
+    top_color.color = 0xFFFCCE30;
+    bottom_color.color = 0xFFCC5050;
 }
 
 void Sky::render() {
+    if (batch.texture == nullptr)
+        return;
+
     batch.begin();
     batch.vertices[0] = Vertex{0     , 0     , -1.0f, uv.x / batch.texture->width,               uv.y / batch.texture->height,               top_color.color};
     batch.vertices[1] = Vertex{0     , size.y, -1.0f, uv.x / batch.texture->width,               (uv.y + uv.height) / batch.texture->height, bottom_color.color};
