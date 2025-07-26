@@ -113,11 +113,14 @@ bool load_map(Map& map, const std::string& file_path) {
             yyjson_val* cam_region_width  = yyjson_obj_get(val, "width");
             yyjson_val* cam_region_height = yyjson_obj_get(val, "height");
 
-            map.cam_regions.push_back(SokoRegion{
+            map.cam_regions.push_back({
+                SokoRegion{
                     .x = yyjson_get_int(cam_region_x),
                     .y = yyjson_get_int(cam_region_y),
                     .width = yyjson_get_int(cam_region_width),
                     .height = yyjson_get_int(cam_region_height),
+                },
+                Vector2(120.0f, 40.0f)
                 });
         }
     }

@@ -25,8 +25,9 @@ struct Prop {
     Turbine::Sprite sprite;
 };
 
-struct CameraTarget {
-    float x, y;
+struct CameraRegion {
+    SokoRegion region;
+    Vector2 target;
 };
 
 struct Goal {
@@ -41,7 +42,7 @@ struct Map {
     
     std::vector<uint16_t> tiles;
     std::vector<Tileset> tilemaps;
-    std::vector<SokoRegion> cam_regions;
+    std::vector<CameraRegion> cam_regions;
     std::vector<Prop> props;
     std::vector<Goal> goals;
     Turbine::Sprite tile_sprite;
