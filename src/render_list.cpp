@@ -40,7 +40,6 @@ void RenderList::queue(Sprite& sprite) {
 }
 
 void RenderList::begin() {
-    current_batch = nullptr;
     last_texture = nullptr;
 }
 
@@ -52,7 +51,6 @@ void RenderList::end() {
         }
     }
 
-    current_batch = nullptr;
     last_texture = nullptr;
 }
 }

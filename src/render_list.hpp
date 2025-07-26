@@ -15,7 +15,6 @@ public:
     void end(void);
 private:
     std::unordered_map<uint32_t, Batch> batches;
-    Batch* current_batch = nullptr;
     Texture* last_texture = nullptr;
 };
 }
