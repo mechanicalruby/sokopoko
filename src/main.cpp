@@ -129,6 +129,21 @@ int main(int argc, char *argv[]) {
         int fwidth, fheight;
         glfwGetFramebufferSize(window.ptr, &fwidth, &fheight);
         Turbine::set_viewport(0, 0, fwidth, fheight);
+
+        // now scale framebuffer w/ engine config
+        float scale_factor = std::min(
+            fwidth  / (float)INTERNAL_SCREEN_WIDTH,
+            fheight / (float)INTERNAL_SCREEN_HEIGHT
+            );
+        
+        // scale_factor = std::floor(scale_factor);
+
+        render_target.scale.x = scale_factor;
+        render_target.scale.y = scale_factor;
+
+        render_target.position.x = fwidth  / 2.0f;
+        render_target.position.y = fheight / 2.0f;
+
 #if !TB_GRAPHICS_LEGACY
         Turbine::uniform_mat4(shader, "projection", glm::ortho(0.0f, (float)fwidth,
                                                                (float)fheight, 0.0f, 1.0f, -1.0f));
