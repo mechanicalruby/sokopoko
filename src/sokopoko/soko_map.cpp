@@ -209,12 +209,7 @@ bool save_map(Map& map, const std::string& file_path) {
     return suc;
 }
 
-void draw_map(Map& map, Turbine::Batch& batch) {
-    if (batch.texture == nullptr || batch.texture->width == 0) {
-        return;
-    }
-
-    batch.begin();
+void draw_map(Map& map, Turbine::RenderList& render_list, Turbine::Texture* texture) {
     for(int i = 0; i < map.tiles.size(); i++) {
         uint16_t& tile_id = map.tiles[i];
 
@@ -223,7 +218,7 @@ void draw_map(Map& map, Turbine::Batch& batch) {
             continue;
         }
 
-        int texture_width = batch.texture->width;
+        int texture_width = texture->width;
         int column_width = texture_width / 24; // nearest whole multiple 
 
         int tile_x = tile_id % column_width;
@@ -232,10 +227,10 @@ void draw_map(Map& map, Turbine::Batch& batch) {
         map.tile_sprite.region   = Turbine::Rect(tile_x * 24.0f, tile_y * 24.0f, 24.0f, 24.0f);
         map.tile_sprite.position = Turbine::Vector2((i % map.width) * 24.0f,
                                                     (i / map.width) * 24.0f);
+        map.tile_sprite.texture  = texture;
 
-        batch.queue(map.tile_sprite);
+        render_list.queue(map.tile_sprite);
     }
-    batch.end();
 }
 
 void change_tile(Map& map, SokoPosition position, uint16_t new_id) {

@@ -3,8 +3,20 @@
 
 #include "sprite.hpp"
 
-namespace Turbine {
-void auto_render_list(const std::vector<Sprite*>& sprites);
-}
+#include <iostream>
+#include <unordered_map>
 
+namespace Turbine {
+struct RenderList {
+public:
+    RenderList() = default;
+    void queue(Sprite& sprite);
+    void begin(void);
+    void end(void);
+private:
+    std::unordered_map<uint32_t, Batch> batches;
+    Batch* current_batch = nullptr;
+    Texture* last_texture = nullptr;
+};
+}
 #endif

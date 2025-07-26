@@ -1,12 +1,13 @@
 #include "string.hpp"
 
 namespace Turbine {
-void queue_bitmap_string(Batch& batch, const char* string, float x, float y) {
+void queue_bitmap_string(RenderList& render_list, Texture* texture, const char* string, float x, float y) {
     int line = 0;
     int offset = 0;
     size_t len = strlen(string);
     Sprite char_sprite;
     char_sprite.centered = false;
+    char_sprite.texture = texture;
 
     // create lookup table for character indices (only needs to be done once)
     static int char_indices[128] = {0};
@@ -55,7 +56,7 @@ void queue_bitmap_string(Batch& batch, const char* string, float x, float y) {
             char_sprite.position.y = y + (line * 12.0f);
             char_sprite.region = Rect{char_x, char_y, 6.0f, 12.0f};
         
-            batch.queue(char_sprite);
+            render_list.queue(char_sprite);
         }
 
         offset++;

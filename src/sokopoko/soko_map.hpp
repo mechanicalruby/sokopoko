@@ -3,6 +3,7 @@
 
 #include "../sprite.hpp"
 #include "../atlas.hpp"
+#include "../render_list.hpp"
 #include "soko.hpp"
 
 #include <iostream>
@@ -58,7 +59,7 @@ struct Map {
 
 bool load_map(Map& map, const std::string& file_path);
 bool save_map(Map& map, const std::string& file_path);
-void draw_map(Map& map, Turbine::Batch& batch);
+void draw_map(Map& map, Turbine::RenderList& render_list, Turbine::Texture* texture);
 
 void change_tile(Map& map, SokoPosition position, uint16_t new_id);
 SokoObject* create_object(Map& map, const std::string& name, SokoObjectClass type, SokoPosition position);
